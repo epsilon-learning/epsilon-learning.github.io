@@ -98,12 +98,20 @@ body {
 
 /* VIDEO BLOCK */
 
-.video-box {
+.video-wrapper {
     width: 100%;
+    height: 320px; /* overall space */
+    display: flex;
+    justify-content: center;
+    align-items: center; /* centers vertically */
+}
+
+.video-box {
+    width: 90%;
     height: 250px;
     background: #b5cedb;
-    border-radius: 4px;
-    margin-bottom: 25px;
+    border-radius: 6px;
+    transition: transform 0.4s ease, opacity 0.4s ease;
 }
 
 /* DESCRIPTION */
