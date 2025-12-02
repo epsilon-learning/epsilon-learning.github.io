@@ -130,3 +130,13 @@ body {
     max-width: 75%;
 }
 
+.video-box.animate-out {
+    transform: translateX(-40px);
+    opacity: 0;
+}
+
+.video-box.animate-in {
+    transform: translateX(0);
+    opacity: 1;
+}
+
