@@ -65,8 +65,10 @@ body {
     height: 4px;
     background: var(--blue);
     border-radius: 4px;
-    transition: all 0.32s cubic-bezier(.2, .9, .2, 1);
+    transition: transform .32s cubic-bezier(.2, .9, .2, 1),
+                width .32s cubic-bezier(.2, .9, .2, 1) !important;
 }
+
 
 /* Disable animation when loading */
 .nav-indicator.no-animate {
