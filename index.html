@@ -57,33 +57,6 @@
     </main>
   </div>
 
-  <script>
-    // NAV INDICATOR - works on page load and updates on click
-    (function(){
-      const items = document.querySelectorAll('.nav-item');
-      const indicator = document.querySelector('.nav-indicator');
-      function move(el){
-        if(!el) return;
-        const r = el.getBoundingClientRect();
-        const p = el.parentElement.getBoundingClientRect();
-        const left = Math.round(r.left - p.left);
-        indicator.style.width = Math.round(r.width) + 'px';
-        indicator.style.transform = 'translateX(' + left + 'px)';
-      }
-      // init after fonts/layout settle
-      window.addEventListener('load', ()=> move(document.querySelector('.nav-item.active')));
-      // handle clicks (for demo when navigating within same domain)
-      items.forEach(it=>{
-        it.addEventListener('click', e=>{
-          items.forEach(x=>x.classList.remove('active'));
-          it.classList.add('active');
-          move(it);
-        });
-      });
-      // reposition on resize
-      window.addEventListener('resize', ()=> move(document.querySelector('.nav-item.active')));
-    })();
-  </script>
 </body>
 </html>
 
