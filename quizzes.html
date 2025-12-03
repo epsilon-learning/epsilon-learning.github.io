@@ -66,20 +66,5 @@
     </main>
   </div>
 
-  <script>
-    (function(){
-      const items = document.querySelectorAll('.nav-item');
-      const indicator = document.querySelector('.nav-indicator');
-      function move(el){ if(!el) return; const r=el.getBoundingClientRect(), p=el.parentElement.getBoundingClientRect(); indicator.style.width=Math.round(r.width)+'px'; indicator.style.transform='translateX('+Math.round(r.left-p.left)+'px)'; }
-      window.addEventListener('load', ()=> move(document.querySelector('.nav-item.active')));
-      items.forEach(it=> it.addEventListener('click', ()=>{ document.querySelector('.nav-item.active')?.classList.remove('active'); it.classList.add('active'); move(it); }));
-      window.addEventListener('resize', ()=> move(document.querySelector('.nav-item.active')));
-    })();
-
-    // simple demo function for Start
-    function startDemoQuiz(){
-      alert('Quiz starting (demo). For the competition, implement quiz interactivity or present a mockup.');
-    }
-  </script>
 </body>
 </html>
