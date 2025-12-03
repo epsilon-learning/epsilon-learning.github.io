@@ -1,6 +1,3 @@
-/* ===========================================
-   GLOBAL NAV INDICATOR CONTROLLER
-   =========================================== */
 (function () {
     const items = document.querySelectorAll(".nav-item");
     const indicator = document.querySelector(".nav-indicator");
@@ -9,27 +6,28 @@
         if (!el) return;
 
         const rect = el.getBoundingClientRect();
-        const parentRect = el.parentElement.getBoundingClientRect();
+        const parent = el.parentElement.getBoundingClientRect();
 
-        indicator.style.width = Math.round(rect.width) + "px";
-        indicator.style.transform =
-            "translateX(" + Math.round(rect.left - parentRect.left) + "px)";
+        indicator.style.width = rect.width + "px";
+        indicator.style.transform = `translateX(${rect.left - parent.left}px)`;
     }
 
-    // Position instantly on load (no animation)
-    window.addEventListener("load", () => {
-        const active = document.querySelector(".nav-item.active");
+    // Disable animation BEFORE first render
+    indicator.classList.add("no-animate");
 
-        indicator.classList.add("no-animate");
+    window.addEventListener("DOMContentLoaded", () => {
+        const active = document.querySelector(".nav-item.active");
         moveIndicator(active);
 
-        // Allow animation again AFTER positioning
+        // Force two frames to guarantee no animation on load
         requestAnimationFrame(() => {
-            indicator.classList.remove("no-animate");
+            requestAnimationFrame(() => {
+                indicator.classList.remove("no-animate");
+            });
         });
     });
 
-    // Animate indicator on click
+    // Animate when clicking tabs (only after load)
     items.forEach((item) => {
         item.addEventListener("click", () => {
             document.querySelector(".nav-item.active")?.classList.remove("active");
@@ -39,7 +37,7 @@
         });
     });
 
-    // Re-center indicator on window resize
+    // Readjust indicator on resize
     window.addEventListener("resize", () => {
         moveIndicator(document.querySelector(".nav-item.active"));
     });
