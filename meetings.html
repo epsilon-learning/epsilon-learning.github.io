@@ -1,69 +1,48 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Epsilon — Meetings</title>
+    <meta charset="UTF-8">
+    <title>Epsilon — Meetings</title>
 
-  <!-- Fonts & Icons -->
-  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
-  <link rel="stylesheet" href="style.css">
-<script src="script.js" defer></script>
-
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
+
 <body>
 
-  <div class="navbar">
+<div class="navbar">
     <div class="nav-links">
-      <a class="nav-item" href="index.html"><i class="fa-solid fa-house"></i>&nbsp; Home</a>
-      <a class="nav-item" href="library.html">Library</a>
-      <a class="nav-item" href="quizzes.html">Quizzes</a>
-      <a class="nav-item" href="videos.html">Videos</a>
-      <a class="nav-item active" href="meetings.html">Meetings</a>
-
-      <div class="nav-indicator no-animate"></div>
-
+        <a class="nav-item" href="index.html"><i class="fa-solid fa-house"></i> Home</a>
+        <a class="nav-item" href="library.html">Library</a>
+        <a class="nav-item" href="quizzes.html">Quizzes</a>
+        <a class="nav-item" href="videos.html">Videos</a>
+        <a class="nav-item active" href="meetings.html">Meetings</a>
+        <div class="nav-indicator"></div>
     </div>
 
     <div class="search-area">
-      <i class="fa-solid fa-magnifying-glass"></i>
-      <input placeholder="Search meetings" />
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input placeholder="Search meetings">
     </div>
-  </div>
+</div>
 
-  <div class="container">
-    <aside class="left-panel">
-      <div style="font-weight:700;font-size:20px">Epsilon</div>
-      <div style="margin-top:12px;color:var(--panel)">Group Study</div>
-      <hr style="opacity:.06;margin:16px 0">
-      <div style="color:var(--white);font-size:13px">Upcoming</div>
-    </aside>
+<div class="container">
 
-    <main class="main-content">
-      <div class="module-title">Study Sessions & Tutoring</div>
+    <div class="left-panel">
+        <h3>Epsilon</h3>
+        <p style="color: var(--panel);">Meetings</p>
+    </div>
 
-      <div class="calendar">
-        <div class="session">
-          <h4>Genetics Tutoring</h4>
-          <div style="color:var(--muted);font-size:13px">Wednesdays — 3:00 PM</div>
-          <div style="margin-top:10px"><button class="join" onclick="joinDemo()">Join</button></div>
+    <div class="main-content">
+        <div class="card">
+            <h2>Upcoming Study Sessions</h2>
+            <p class="description-text">Join group sessions and tutoring events.</p>
         </div>
+    </div>
 
-        <div class="session">
-          <h4>Exam Review</h4>
-          <div style="color:var(--muted);font-size:13px">Sundays — 5:00 PM</div>
-          <div style="margin-top:10px"><button class="join" onclick="joinDemo()">Join</button></div>
-        </div>
+</div>
 
-        <div class="session">
-          <h4>Study Group — Cells</h4>
-          <div style="color:var(--muted);font-size:13px">Fridays — 4:00 PM</div>
-          <div style="margin-top:10px"><button class="join" onclick="joinDemo()">Join</button></div>
-        </div>
-      </div>
-    </main>
-  </div>
 </body>
 </html>
