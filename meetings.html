@@ -65,18 +65,5 @@
       </div>
     </main>
   </div>
-
-  <script>
-    (function(){
-      const items = document.querySelectorAll('.nav-item');
-      const indicator = document.querySelector('.nav-indicator');
-      function move(el){ if(!el) return; const r=el.getBoundingClientRect(), p=el.parentElement.getBoundingClientRect(); indicator.style.width=Math.round(r.width)+'px'; indicator.style.transform='translateX('+Math.round(r.left-p.left)+'px)'; }
-      window.addEventListener('load', ()=> move(document.querySelector('.nav-item.active')));
-      items.forEach(it=> it.addEventListener('click', ()=>{ document.querySelector('.nav-item.active')?.classList.remove('active'); it.classList.add('active'); move(it); }));
-      window.addEventListener('resize', ()=> move(document.querySelector('.nav-item.active')));
-    })();
-
-    function joinDemo(){ alert('Joining session (demo). For presentation, describe how students join or show a signup mockup).'); }
-  </script>
 </body>
 </html>
