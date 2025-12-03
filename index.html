@@ -1,63 +1,46 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Epsilon — Home</title>
+    <meta charset="UTF-8">
+    <title>Epsilon — Home</title>
 
-  <!-- Fonts & Icons -->
-  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
-  <link rel="stylesheet" href="style.css">
-<script src="script.js" defer></script>
-
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600&display=swap" rel="stylesheet">
+    <script src="script.js" defer></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
+
 <body>
 
-  <!-- NAV -->
-  <div class="navbar">
-    <div class="nav-links" role="navigation" aria-label="Main">
-      <a class="nav-item active" href="index.html"><i class="fa-solid fa-house"></i>&nbsp; Home</a>
-      <a class="nav-item" href="library.html">Library</a>
-      <a class="nav-item" href="quizzes.html">Quizzes</a>
-      <a class="nav-item" href="videos.html">Videos</a>
-      <a class="nav-item" href="meetings.html">Meetings</a>
-
-      <div class="nav-indicator no-animate"></div>
+<div class="navbar">
+    <div class="nav-links">
+        <a class="nav-item active" href="index.html"><i class="fa-solid fa-house"></i> Home</a>
+        <a class="nav-item" href="library.html">Library</a>
+        <a class="nav-item" href="quizzes.html">Quizzes</a>
+        <a class="nav-item" href="videos.html">Videos</a>
+        <a class="nav-item" href="meetings.html">Meetings</a>
+        <div class="nav-indicator"></div>
     </div>
 
-    <div class="search-area" role="search">
-      <i class="fa-solid fa-magnifying-glass"></i>
-      <input placeholder="Search" />
+    <div class="search-area">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input placeholder="Search">
     </div>
-  </div>
+</div>
 
-  <!-- PAGE -->
-  <div class="container">
-    <aside class="left-panel">
-      <div class="logo">Epsilon</div>
-      <div class="muted">Student Learning Hub — Biology</div>
-      <hr style="opacity:.06;margin:16px 0">
-      <div style="font-size:13px;line-height:1.5">Quick Links<br><br>
-        • Library<br>• Quizzes<br>• Videos<br>• Meetings
-      </div>
-    </aside>
+<div class="container">
+    <div class="left-panel">
+        <h3>Epsilon</h3>
+        <p style="color: var(--panel);">Dashboard</p>
+    </div>
 
-    <main class="main-content">
-      <div class="card">
-        <h1>Welcome to Epsilon</h1>
-        <p class="lead">A student-created biology learning hub. Use the navigation above to explore lessons, take quizzes, watch short videos, and join group study sessions.</p>
-      </div>
-
-      <div class="card">
-        <h3 style="margin-top:0">Getting Started</h3>
-        <p style="margin:0;color:var(--muted)">We recommend starting in the Library to work through the 20 lessons, then test your understanding in Quizzes. Videos and Meetings supplement classroom learning.</p>
-      </div>
-    </main>
-  </div>
+    <div class="main-content">
+        <div class="card">
+            <h1>Welcome to Epsilon</h1>
+            <p class="description-text">Your biology learning hub.</p>
+        </div>
+    </div>
+</div>
 
 </body>
 </html>
-
-
