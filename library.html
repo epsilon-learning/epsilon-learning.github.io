@@ -1,66 +1,49 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Epsilon — Library</title>
+    <meta charset="UTF-8">
+    <title>Epsilon — Library</title>
 
-  <!-- Fonts & Icons -->
-  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
-  <link rel="stylesheet" href="style.css">
-<script src="script.js" defer></script>
-
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
+
 <body>
 
-  <div class="navbar">
+<div class="navbar">
     <div class="nav-links">
-      <a class="nav-item" href="index.html"><i class="fa-solid fa-house"></i>&nbsp; Home</a>
-      <a class="nav-item active" href="library.html">Library</a>
-      <a class="nav-item" href="quizzes.html">Quizzes</a>
-      <a class="nav-item" href="videos.html">Videos</a>
-      <a class="nav-item" href="meetings.html">Meetings</a>
-
-      <div class="nav-indicator no-animate"></div>
+        <a class="nav-item" href="index.html"><i class="fa-solid fa-house"></i> Home</a>
+        <a class="nav-item active" href="library.html">Library</a>
+        <a class="nav-item" href="quizzes.html">Quizzes</a>
+        <a class="nav-item" href="videos.html">Videos</a>
+        <a class="nav-item" href="meetings.html">Meetings</a>
+        <div class="nav-indicator"></div>
     </div>
 
     <div class="search-area">
-      <i class="fa-solid fa-magnifying-glass"></i>
-      <input placeholder="Search lessons" />
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input placeholder="Search lessons">
     </div>
-  </div>
+</div>
 
-  <div class="container">
-    <aside class="left-panel">
-      <div class="logo" style="font-weight:700;font-size:20px">Epsilon</div>
-      <div style="margin-top:12px" class="muted">Library — Lessons</div>
-      <hr style="opacity:.06;margin:16px 0">
-      <div class="muted">Units</div>
-      <ul style="padding-left:14px;margin-top:8px;color:var(--panel)">
-        <li>Cells</li>
-        <li>Genetics</li>
-        <li>Evolution</li>
-        <li>Human Body</li>
-        <li>Ecology</li>
-      </ul>
-    </aside>
+<div class="container">
 
-    <main class="main-content">
-      <div class="module-title">Library — Lessons</div>
+    <div class="left-panel">
+        <h3>Epsilon</h3>
+        <p style="color: var(--panel);">Library</p>
+    </div>
 
-      <div class="lesson-grid">
-        <!-- Example lesson cards (repeat/change) -->
-        <div class="lesson-card"><h4>Lesson 1: Cell Structure</h4><div class="muted">Intro to cells, organelles, function</div></div>
-        <div class="lesson-card"><h4>Lesson 2: Cellular Respiration</h4><div class="muted">ATP, glycolysis, mitochondria</div></div>
-        <div class="lesson-card"><h4>Lesson 3: DNA & Chromosomes</h4><div class="muted">DNA structure & replication</div></div>
-        <div class="lesson-card"><h4>Lesson 4: Mendelian Genetics</h4><div class="muted">Inheritance patterns</div></div>
-        <div class="lesson-card"><h4>Lesson 5: Evolution Basics</h4><div class="muted">Natural selection & adaptation</div></div>
-        <div class="lesson-card"><h4>Lesson 6: Ecology Intro</h4><div class="muted">Ecosystems & energy flow</div></div>
-      </div>
-    </main>
-  </div>
+    <div class="main-content">
+        <div class="card">
+            <h2>Lessons</h2>
+            <p class="description-text">Your 20-lesson biology course begins here.</p>
+        </div>
+    </div>
+
+</div>
+
 </body>
 </html>
 
