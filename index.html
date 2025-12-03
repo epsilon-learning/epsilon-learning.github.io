@@ -1,136 +1,200 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Epsilon – Home</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Epsilon — Home</title>
 
-    <!-- Google Fonts: Lexend -->
-    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Fonts & Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    :root{
+      --black:#000000;
+      --dark:#1E1E1E;
+      --blue:#00AAFF;
+      --panel:#B8D3DD;
+      --white:#FFFFFF;
 
-    <style>
-        body {
-            margin: 0;
-            font-family: "Lexend", sans-serif;
-            background: #f2f2f2;
-        }
+      --bg:#F2F2F2;
+      --muted:#444;
+    }
 
-        /* NAVBAR */
-        .navbar {
-            width: 100%;
-            height: 50px;
-            background: #ffffff;
-            border-bottom: 1px solid #ccc;
-            display: flex;
-            align-items: center;
-            padding: 0 20px;
-            box-sizing: border-box;
-        }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:"Lexend",sans-serif;
+      background:var(--bg);
+      color:var(--black);
+    }
 
-        .nav-links {
-            display: flex;
-            position: relative;
-            gap: 28px;
-            margin-right: auto;
-        }
+    /* NAVBAR */
+    .navbar{
+      width:100%;
+      height:58px;
+      background:var(--white);
+      border-bottom:1px solid rgba(0,0,0,0.06);
+      display:flex;
+      align-items:center;
+      padding:0 20px;
+    }
+    .nav-links{
+      display:flex;
+      gap:28px;
+      align-items:center;
+      position:relative;
+      margin-right:auto;
+    }
+    .nav-item{
+      text-decoration:none;
+      color:var(--dark);
+      font-weight:500;
+      padding:8px 4px;
+      cursor:pointer;
+      white-space:nowrap;
+    }
+    .nav-item.active{ color:var(--blue); }
 
-        .nav-item {
-            text-decoration: none;
-            color: #333;
-            font-weight: 500;
-            padding: 6px 4px;
-            cursor: pointer;
-        }
+    .nav-indicator{
+      position:absolute;
+      bottom:-1px;
+      height:4px;
+      background:var(--blue);
+      border-radius:4px;
+      transition:all .32s cubic-bezier(.2,.9,.2,1);
+      will-change:transform,width;
+    }
 
-        .nav-item.active {
-            color: #1e90ff;
-        }
+    /* SEARCH */
+    .search-area{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      background: rgba(0,0,0,0.04);
+      padding:6px 12px;
+      border-radius:20px;
+    }
+    .search-area input{
+      border:0;
+      outline:0;
+      background:transparent;
+      font-size:14px;
+      width:160px;
+    }
 
-        .nav-indicator {
-            position: absolute;
-            bottom: -1px;
-            height: 3px;
-            background: #1e90ff;
-            border-radius: 3px;
-            transition: all 0.35s ease;
-        }
+    /* LAYOUT */
+    .container{ display:flex; width:100%; gap:0; padding:22px 30px; }
+    .left-panel{
+      width:220px;
+      min-width:160px;
+      background:var(--dark);
+      color:var(--white);
+      border-radius:8px;
+      height:calc(100vh - 110px);
+      padding:18px;
+    }
+    .left-panel .logo{ font-weight:700; font-size:20px; margin-bottom:20px; text-align:center; }
+    .left-panel .muted{ color:var(--panel); font-size:13px; }
 
-        /* SEARCH BAR */
-        .search-area {
-            display: flex;
-            align-items: center;
-            background: #e6e6e6;
-            padding: 5px 10px;
-            border-radius: 20px;
-        }
+    .main-content{
+      flex:1;
+      padding:6px 30px;
+    }
 
-        .search-area input {
-            border: none;
-            background: transparent;
-            outline: none;
-            font-size: 14px;
-            margin-left: 8px;
-        }
+    h1{ font-size:28px; margin:0 0 10px 0; }
+    p.lead{ color:var(--muted); max-width:760px; line-height:1.5 }
 
-        /* PAGE LAYOUT */
-        .content {
-            padding: 40px;
-        }
-    </style>
+    /* small utility */
+    .card{
+      background:var(--white);
+      border-radius:10px;
+      padding:18px;
+      box-shadow:0 6px 18px rgba(10,10,20,0.04);
+      margin-bottom:18px;
+    }
+
+    /* responsive */
+    @media (max-width:900px){
+      .container{ padding:12px; flex-direction:column; }
+      .left-panel{ width:100%; height:auto; order:2; }
+      .main-content{ order:1; padding:12px 0; }
+      .search-area input{ width:80px; }
+    }
+  </style>
 </head>
-
 <body>
 
-    <!-- HEADER / NAVBAR -->
-    <div class="navbar">
-        <div class="nav-links">
-            <a class="nav-item active" href="index.html"><i class="fa-solid fa-house"></i> Home</a>
-            <a class="nav-item" href="library.html">Library</a>
-            <a class="nav-item" href="quizzes.html">Quizzes</a>
-            <a class="nav-item" href="videos.html">Videos</a>
-            <a class="nav-item" href="meetings.html">Meetings</a>
+  <!-- NAV -->
+  <div class="navbar">
+    <div class="nav-links" role="navigation" aria-label="Main">
+      <a class="nav-item active" href="index.html"><i class="fa-solid fa-house"></i>&nbsp; Home</a>
+      <a class="nav-item" href="library.html">Library</a>
+      <a class="nav-item" href="quizzes.html">Quizzes</a>
+      <a class="nav-item" href="videos.html">Videos</a>
+      <a class="nav-item" href="meetings.html">Meetings</a>
 
-            <div class="nav-indicator"></div>
-        </div>
-
-        <div class="search-area">
-            <i class="fa-solid fa-magnifying-glass"></i>
-            <input type="text" placeholder="Search">
-        </div>
+      <div class="nav-indicator"></div>
     </div>
 
-    <!-- PAGE CONTENT -->
-    <div class="content">
+    <div class="search-area" role="search">
+      <i class="fa-solid fa-magnifying-glass"></i>
+      <input placeholder="Search" />
+    </div>
+  </div>
+
+  <!-- PAGE -->
+  <div class="container">
+    <aside class="left-panel">
+      <div class="logo">Epsilon</div>
+      <div class="muted">Student Learning Hub — Biology</div>
+      <hr style="opacity:.06;margin:16px 0">
+      <div style="font-size:13px;line-height:1.5">Quick Links<br><br>
+        • Library<br>• Quizzes<br>• Videos<br>• Meetings
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <div class="card">
         <h1>Welcome to Epsilon</h1>
-        <p>This is the homepage.</p>
-    </div>
+        <p class="lead">A student-created biology learning hub. Use the navigation above to explore lessons, take quizzes, watch short videos, and join group study sessions.</p>
+      </div>
 
-    <script>
-        const items = document.querySelectorAll('.nav-item');
-        const indicator = document.querySelector('.nav-indicator');
+      <div class="card">
+        <h3 style="margin-top:0">Getting Started</h3>
+        <p style="margin:0;color:var(--muted)">We recommend starting in the Library to work through the 20 lessons, then test your understanding in Quizzes. Videos and Meetings supplement classroom learning.</p>
+      </div>
+    </main>
+  </div>
 
-        function moveIndicator(item) {
-            const rect = item.getBoundingClientRect();
-            const parent = item.parentElement.getBoundingClientRect();
-            const left = rect.left - parent.left;
-            indicator.style.width = `${rect.width}px`;
-            indicator.style.transform = `translateX(${left}px)`;
-        }
-
-        moveIndicator(document.querySelector('.nav-item.active'));
-
-        items.forEach(i => {
-            i.addEventListener('click', () => {
-                document.querySelector('.nav-item.active')?.classList.remove('active');
-                i.classList.add('active');
-                moveIndicator(i);
-            });
+  <script>
+    // NAV INDICATOR - works on page load and updates on click
+    (function(){
+      const items = document.querySelectorAll('.nav-item');
+      const indicator = document.querySelector('.nav-indicator');
+      function move(el){
+        if(!el) return;
+        const r = el.getBoundingClientRect();
+        const p = el.parentElement.getBoundingClientRect();
+        const left = Math.round(r.left - p.left);
+        indicator.style.width = Math.round(r.width) + 'px';
+        indicator.style.transform = 'translateX(' + left + 'px)';
+      }
+      // init after fonts/layout settle
+      window.addEventListener('load', ()=> move(document.querySelector('.nav-item.active')));
+      // handle clicks (for demo when navigating within same domain)
+      items.forEach(it=>{
+        it.addEventListener('click', e=>{
+          items.forEach(x=>x.classList.remove('active'));
+          it.classList.add('active');
+          move(it);
         });
-    </script>
-
+      });
+      // reposition on resize
+      window.addEventListener('resize', ()=> move(document.querySelector('.nav-item.active')));
+    })();
+  </script>
 </body>
 </html>
+
 
