@@ -7,25 +7,25 @@
 
   <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <link rel="stylesheet" href="style.css?v=1.0.5">
+  <link rel="stylesheet" href="style.css?v=1.0.6">
 </head>
 <body>
 
   <header class="navbar">
-    <div class="nav-links" role="navigation" aria-label="Main">
+    <nav class="nav-links" role="navigation" aria-label="Main">
       <a class="nav-item active" data-page="epsilon">Epsilon</a>
       <a class="nav-item" data-page="dashboard">Dashboard</a>
       <a class="nav-item" data-page="resources">Resources</a>
       <a class="nav-item" data-page="scheduler">Scheduler</a>
       <a class="nav-item" data-page="forYou">For You</a>
-    </div>
-    <!-- moved search into sidebar -->
+
+      <div class="nav-indicator" aria-hidden="true"></div>
+    </nav>
   </header>
 
   <div class="container">
-
-    <!-- LEFT SIDEBAR -->
-    <aside class="left-panel">
+    <!-- LEFT SIDEBAR (will be collapsed on Epsilon page) -->
+    <aside id="left-panel" class="left-panel collapsed" aria-hidden="true">
       <div class="sidebar">
         <div class="left-brand">
           <h3>Epsilon</h3>
@@ -54,9 +54,7 @@
 
         <div class="card">
           <div class="sidebar-section-title">Filter by Module</div>
-          <ul class="module-list" id="module-list">
-            <!-- populated dynamically -->
-          </ul>
+          <ul class="module-list" id="module-list"><!-- filled dynamically --></ul>
         </div>
 
         <div class="card">
@@ -69,16 +67,14 @@
       </div>
     </aside>
 
-    <!-- MAIN -->
-    <main id="page-root" class="main-content"></main>
+    <!-- MAIN CONTENT -->
+    <main id="page-root" class="main-content" tabindex="-1"></main>
   </div>
 
-  <footer>
-    © 2025 Epsilon — Business Learning
-  </footer>
+  <footer>© 2025 Epsilon — Business Learning</footer>
 
-  <script>console.log("Epsilon SPA v1.0.5");</script>
-  <script src="script.js?v=1.0.5" defer></script>
+  <script>console.log("Epsilon SPA v1.0.6");</script>
+  <script src="script.js?v=1.0.6" defer></script>
 </body>
 </html>
 
