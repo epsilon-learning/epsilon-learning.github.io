@@ -151,3 +151,37 @@ button.btn-light{ background:#f1f1f1; color:#111; }
   .main-content{ order:1; }
 }
 
+/* --- CONTAINER BEHAVIOR --- */
+
+/* default for pages without sidebar */
+.container.no-sidebar {
+  display: block;
+  padding-left: 0 !important;
+  margin-left: 0 !important;
+}
+
+/* resources layout */
+.container.with-sidebar {
+  display: flex;
+  gap: 20px;
+}
+
+/* --- SIDEBAR COLLAPSE BEHAVIOR --- */
+
+.left-panel.collapsed {
+  width: 0 !important;
+  min-width: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  opacity: 0;
+  overflow: hidden;
+  pointer-events: none;
+  transition: width 0.3s ease, opacity 0.3s ease;
+}
+
+.left-panel {
+  width: 240px;
+  min-width: 240px;
+  transition: width 0.3s ease, opacity 0.3s ease;
+}
+
