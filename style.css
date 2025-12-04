@@ -122,3 +122,17 @@ body{
   .nav-links{ gap:12px; overflow:auto; }
 }
 
+.sidebar {
+  color: #000;
+}
+
+.sidebar-section-title,
+.sidebar-label,
+.sidebar-category {
+  color: #000;
+}
+
+.sidebar a {
+  color: #000;
+}
+
