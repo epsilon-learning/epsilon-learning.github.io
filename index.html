@@ -1,61 +1,101 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Epsilon — Home</title>
 
-    <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Epsilon</title>
+
+    <!-- Fonts & Icons -->
     <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600&display=swap" rel="stylesheet">
-    <script src="script.js" defer></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link rel="preconnect" href="https://fonts.gstatic.com">
-<link rel="preload" href="style.css" as="style">
-<link rel="preload" href="script.js" as="script">
-<link rel="preload" href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600&display=swap" as="style">
 
+    <!-- Global Styles -->
+    <link rel="stylesheet" href="style.css">
 
 </head>
-
 <body>
-<!-- Full-site background preloading -->
-<div style="display:none;">
-    <iframe src="index.html"></iframe>
-    <iframe src="library.html"></iframe>
-    <iframe src="quizzes.html"></iframe>
-    <iframe src="videos.html"></iframe>
-    <iframe src="meetings.html"></iframe>
-</div>
 
+    <!-- NAVBAR -->
+    <div class="navbar">
+        <div class="nav-links">
+            <a class="nav-item active" data-page="home"><i class="fa-solid fa-house"></i> Home</a>
+            <a class="nav-item" data-page="library">Library</a>
+            <a class="nav-item" data-page="quizzes">Quizzes</a>
+            <a class="nav-item" data-page="videos">Videos</a>
+            <a class="nav-item" data-page="meetings">Meetings</a>
 
-<div class="navbar">
-    <div class="nav-links">
-        <a class="nav-item active" href="index.html"><i class="fa-solid fa-house"></i> Home</a>
-        <a class="nav-item" href="library.html">Library</a>
-        <a class="nav-item" href="quizzes.html">Quizzes</a>
-        <a class="nav-item" href="videos.html">Videos</a>
-        <a class="nav-item" href="meetings.html">Meetings</a>
-        <div class="nav-indicator"></div>
-    </div>
+            <div class="nav-indicator"></div>
+        </div>
 
-    <div class="search-area">
-        <i class="fa-solid fa-magnifying-glass"></i>
-        <input placeholder="Search">
-    </div>
-</div>
-
-<div class="container">
-    <div class="left-panel">
-        <h3>Epsilon</h3>
-        <p style="color: var(--panel);">Dashboard</p>
-    </div>
-
-    <div class="main-content">
-        <div class="card">
-            <h1>Welcome to Epsilon</h1>
-            <p class="description-text">Your biology learning hub.</p>
+        <div class="search-area">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input placeholder="Search…">
         </div>
     </div>
-</div>
+
+    <!-- MAIN LAYOUT -->
+    <div class="container">
+        <div class="left-panel">
+            <h3>Epsilon</h3>
+            <p>Your biology hub</p>
+        </div>
+
+        <div class="main-content">
+
+            <!-- HOME -->
+            <div id="home" class="section active-section">
+                <div class="card">
+                    <h1>Welcome to Epsilon</h1>
+                    <p>Your biology learning platform.</p>
+                </div>
+            </div>
+
+            <!-- LIBRARY -->
+            <div id="library" class="section">
+                <div class="card">
+                    <h2>Library</h2>
+                    <p>Explore all 20 biology lessons.</p>
+                </div>
+            </div>
+
+            <!-- QUIZZES -->
+            <div id="quizzes" class="section">
+                <div class="card">
+                    <h2>Quizzes</h2>
+                    <p>Test your understanding.</p>
+                </div>
+            </div>
+
+            <!-- VIDEOS -->
+            <div id="videos" class="section">
+                <h3>Module | 02.01</h3>
+                <div class="video-box"></div>
+                <br>
+                <div class="card">
+                    <h3>Description</h3>
+                    <p>A short clip explaining key biology concepts.</p>
+                </div>
+            </div>
+
+            <!-- MEETINGS -->
+            <div id="meetings" class="section">
+                <div class="card">
+                    <h2>Meetings</h2>
+                    <p>Upcoming study sessions and tutoring events.</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer>
+        © 2025 Epsilon — All Rights Reserved.
+    </footer>
+
+    <!-- JS Router + Nav Indicator -->
+    <script src="script.js"></script>
 
 </body>
 </html>
