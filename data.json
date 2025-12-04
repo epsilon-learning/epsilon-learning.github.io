@@ -1,0 +1,129 @@
+[
+  {
+    "id": "01-01-gdp",
+    "module": "01",
+    "moduleName": "Economy Basics",
+    "moduleColor": "#FF0000",
+    "unit": "01.01",
+    "title": "GDP — measuring national output",
+    "description": "What GDP is and how exports/imports affect it.",
+    "mediaType": "quiz",
+    "image": "",
+    "tags": ["economy","macro"],
+    "questions": [
+      {
+        "q": "What does GDP stand for?",
+        "options": ["Gross Domestic Product","General Domestic Pricing","Government Debt Percentage","Global Development Plan"],
+        "answer": 0
+      },
+      {
+        "q": "If exports increase and imports are unchanged, GDP typically:",
+        "options": ["Decreases","Increases","Stays exactly the same","Becomes negative"],
+        "answer": 1
+      }
+    ]
+  },
+  {
+    "id": "01-02-inflation",
+    "module": "01",
+    "moduleName": "Economy Basics",
+    "moduleColor": "#FF0000",
+    "unit": "01.02",
+    "title": "Inflation basics",
+    "description": "How inflation is measured and why prices rise over time.",
+    "mediaType": "lesson",
+    "image": "",
+    "tags": ["economy","inflation"],
+    "contentHtml": "<p>Inflation is the general increase in prices over time. Consumer Price Index (CPI) is commonly used.</p>"
+  },
+  {
+    "id": "02-01-types",
+    "module": "02",
+    "moduleName": "Business Fundamentals",
+    "moduleColor": "#FF6200",
+    "unit": "02.01",
+    "title": "Business Types",
+    "description": "Sole proprietorships, partnerships, corporations and LLCs explained.",
+    "mediaType": "lesson",
+    "image": "",
+    "tags": ["business","structure"],
+    "contentHtml": "<p>Common forms of legal ownership: sole proprietor, partnership, corporation, LLC.</p>"
+  },
+  {
+    "id": "02-03-entre",
+    "module": "02",
+    "moduleName": "Business Fundamentals",
+    "moduleColor": "#FF6200",
+    "unit": "02.03",
+    "title": "Entrepreneurship essentials",
+    "description": "Starting and growing new ventures: idea → product → market fit.",
+    "mediaType": "quiz",
+    "image": "",
+    "tags": ["entrepreneurship"],
+    "questions": [
+      {
+        "q": "Which is essential for early-stage startups?",
+        "options": ["Product-market fit","Large sales team day one","Extensive legacy systems","Regulatory exemptions"],
+        "answer": 0
+      }
+    ]
+  },
+  {
+    "id": "03-01-finstat",
+    "module": "03",
+    "moduleName": "Finance & Accounting",
+    "moduleColor": "#51FF00",
+    "unit": "03.01",
+    "title": "Financial statements overview",
+    "description": "Balance sheet, income statement, and cash flow basics.",
+    "mediaType": "lesson",
+    "image": "",
+    "tags": ["finance","statements"],
+    "contentHtml": "<p>Three main financial statements: balance sheet, income statement, cash flows.</p>"
+  },
+  {
+    "id": "04-01-research",
+    "module": "04",
+    "moduleName": "Marketing & Sales",
+    "moduleColor": "#0077FF",
+    "unit": "04.01",
+    "title": "Market research intro",
+    "description": "How to gather customer insights and analyze markets.",
+    "mediaType": "quiz",
+    "image": "",
+    "tags": ["marketing","research"],
+    "questions": [
+      {
+        "q": "Primary research is:",
+        "options": ["Data you collect directly","Data from third-parties","Only surveys","Always expensive"],
+        "answer": 0
+      }
+    ]
+  },
+  {
+    "id": "05-01-lead",
+    "module": "05",
+    "moduleName": "Management & Operations",
+    "moduleColor": "#A100FF",
+    "unit": "05.01",
+    "title": "Leadership basics",
+    "description": "Key leadership styles and how to guide teams.",
+    "mediaType": "lesson",
+    "image": "",
+    "tags": ["management","leadership"],
+    "contentHtml": "<p>Leadership often combines vision, communication, and delegation.</p>"
+  },
+  {
+    "id": "06-01-attire",
+    "module": "06",
+    "moduleName": "Business Speaking",
+    "moduleColor": "#FB00FF",
+    "unit": "06.01",
+    "title": "Business Attire",
+    "description": "Professional dress codes for different settings.",
+    "mediaType": "lesson",
+    "image": "",
+    "tags": ["presentation","professional"],
+    "contentHtml": "<p>Business casual vs formal. Grooming and etiquette basics.</p>"
+  ]
+]
