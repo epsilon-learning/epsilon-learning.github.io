@@ -219,13 +219,19 @@
     }
   }
 
-  function navigateTo(page){
-    const p = page || "epsilon";
-    state.page = p;
-    setActiveNav(p);
-    // sidebar only on resources
-    showSidebar(p === "resources");
-    renderPage(p);
+  function navigateTo(page) {
+  const container = document.querySelector(".container");
+  const sidebar = document.getElementById("left-panel");
+
+  // Show sidebar ONLY on Resources page
+  if (page === "resources") {
+    container.classList.add("with-sidebar");
+    container.classList.remove("no-sidebar");
+    sidebar.classList.remove("collapsed");
+  } else {
+    container.classList.remove("with-sidebar");
+    container.classList.add("no-sidebar");
+    sidebar.classList.add("collapsed");
   }
 
   function renderPage(name){
