@@ -501,19 +501,14 @@
 
   /* ---------- Init and wiring ---------- */
   function wireNavClicks() {
-    navItems.forEach(item => {
-      // ensure no duplicate listeners
-      item.replaceWith(item.cloneNode(true));
+  document.querySelectorAll(".nav-item").forEach(it => {
+    it.addEventListener("click", () => {
+      const page = it.dataset.page;
+      navigateTo(page);
     });
-    // re-query
-    const freshNav = Array.from(document.querySelectorAll(".nav-item"));
-    freshNav.forEach(it => {
-      it.addEventListener("click", (e) => {
-        const page = it.dataset.page || "epsilon";
-        navigateTo(page);
-      });
-    });
-  }
+  });
+}
+
 
   async function init() {
     await loadData();
