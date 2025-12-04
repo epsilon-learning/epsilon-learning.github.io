@@ -194,4 +194,10 @@ body {
         padding: 12px 0;
     }
 }
+iframe {
+    width: 0;
+    height: 0;
+    border: none;
+    visibility: hidden;
+}
 
