@@ -382,9 +382,29 @@
     navigateTo("epsilon");
   }
 
+function updateSidebarState(page) {
+    const sidebar = document.getElementById("left-panel");
+    const container = document.querySelector(".container");
+
+    const needsSidebar = (page === "resources");
+
+    if (needsSidebar) {
+        sidebar.classList.remove("collapsed");
+        container.classList.remove("sidebar-collapsed");
+    } else {
+        sidebar.classList.add("collapsed");
+        container.classList.add("sidebar-collapsed");
+    }
+}
+updateSidebarState(page);
+
+
+  
   // expose small helpers (optional)
   window.$ = $; window.$$ = $$;
 
+
+  
   init();
 
 })();
