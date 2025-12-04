@@ -1,5 +1,5 @@
-// script.js — regenerated v1.0.8
-// Single-file SPA: router, sidebar behavior (Option A), filters, data loading, quiz results + review, progress
+// script.js — final regenerated v1.0.9
+// SPA: resources-only sidebar, dashboard recommendations, carousel auto-scroll (left loop), robust nav indicator
 (() => {
   const DATA_URL = "data.json?v=" + Date.now();
   const pageRoot = document.getElementById("page-root");
@@ -8,30 +8,19 @@
   const navIndicator = document.querySelector(".nav-indicator");
   const moduleListEl = document.getElementById("module-list");
   const globalSearch = document.getElementById("global-search");
-
   let DATA = [];
   let MODULES = {};
-  const state = {
-    page: "epsilon",
-    filters: { types: new Set(["lesson","quiz","video","meeting"]), modules: new Set(), q: "" }
-  };
+  const state = { page: "epsilon", filters: { types: new Set(["lesson","quiz","video","meeting"]), modules: new Set(), q: "" } };
 
   const LS_PROGRESS = "eps_progress_v1";
   const LS_SCHEDULE = "eps_schedule_v1";
 
-  /* ---------- Utility helpers ---------- */
-  function safeQuery(selector, root = document) {
-    return root.querySelector(selector);
-  }
-  function safeQueryAll(selector, root = document) {
-    return Array.from(root.querySelectorAll(selector));
-  }
-  function escapeHtml(s) {
-    if (s === undefined || s === null) return "";
-    return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  }
+  /* --- safe DOM helpers --- */
+  const $ = (s, root = document) => root.querySelector(s);
+  const $$ = (s, root = document) => Array.from(root.querySelectorAll(s));
+  const escapeHtml = s => { if (s === undefined || s === null) return ""; return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); };
 
-  /* ---------- Data loading ---------- */
+  /* --- data loading --- */
   async function loadData() {
     try {
       const r = await fetch(DATA_URL);
@@ -39,317 +28,287 @@
       const json = await r.json();
       DATA = Array.isArray(json) ? json : [];
     } catch (e) {
-      console.warn("Failed to load data.json:", e);
+      console.warn("Could not load data.json:", e);
       DATA = [];
     }
   }
 
-  /* ---------- Nav indicator ---------- */
+  /* --- nav indicator --- */
   function updateNavIndicator() {
     if (!navIndicator) return;
     const active = document.querySelector(".nav-item.active");
     if (!active || !active.parentElement) {
-      navIndicator.style.width = "0px";
-      navIndicator.style.transform = `translateX(0px)`;
-      return;
+      navIndicator.style.width = "0px"; navIndicator.style.transform = "translateX(0px)"; return;
     }
     const parentRect = active.parentElement.getBoundingClientRect();
     const r = active.getBoundingClientRect();
     navIndicator.style.width = Math.round(r.width) + "px";
     navIndicator.style.transform = `translateX(${Math.round(r.left - parentRect.left)}px)`;
   }
-
   window.addEventListener("resize", updateNavIndicator);
 
-  /* ---------- Local storage helpers ---------- */
-  function loadProgress() { try { return JSON.parse(localStorage.getItem(LS_PROGRESS)) || {}; } catch { return {}; } }
-  function saveProgress(obj) { try { localStorage.setItem(LS_PROGRESS, JSON.stringify(obj)); } catch {} }
-  function loadSchedule() { try { return JSON.parse(localStorage.getItem(LS_SCHEDULE)) || []; } catch { return []; } }
-  function saveSchedule(arr) { try { localStorage.setItem(LS_SCHEDULE, JSON.stringify(arr)); } catch {} }
+  /* --- local storage --- */
+  function loadProgress(){ try{ return JSON.parse(localStorage.getItem(LS_PROGRESS))||{} }catch{return{}} }
+  function saveProgress(obj){ try{ localStorage.setItem(LS_PROGRESS, JSON.stringify(obj)); }catch{} }
+  function loadSchedule(){ try{ return JSON.parse(localStorage.getItem(LS_SCHEDULE))||[] }catch{return[]} }
+  function saveSchedule(arr){ try{ localStorage.setItem(LS_SCHEDULE, JSON.stringify(arr)); }catch{} }
 
-  /* ---------- Modules building ---------- */
-  function buildModules() {
+  /* --- build modules list --- */
+  function buildModules(){
     MODULES = {};
     DATA.forEach(it => {
-      const mid = it.module || "00";
-      if (!MODULES[mid]) MODULES[mid] = { moduleName: it.moduleName || ("Module " + mid), color: it.moduleColor || "#777" };
+      const m = it.module || "00";
+      if(!MODULES[m]) MODULES[m] = { moduleName: it.moduleName || ("Module " + m), color: it.moduleColor || "#777" };
     });
+    if(!moduleListEl) return;
     const keys = Object.keys(MODULES).sort();
-    if (!moduleListEl) return;
-    moduleListEl.innerHTML = keys.map(k => {
-      const m = MODULES[k];
-      return `<li class="module-item" data-module="${k}">
-                <span class="module-dot" style="background:${m.color}"></span>
-                <span class="module-label">${escapeHtml(k)} ${escapeHtml(m.moduleName)}</span>
-              </li>`;
+    moduleListEl.innerHTML = keys.map(k=>{
+      const mm = MODULES[k];
+      return `<li class="module-item" data-module="${k}"><span class="module-dot" style="background:${mm.color}"></span><span class="module-label">${escapeHtml(k)} ${escapeHtml(mm.moduleName)}</span></li>`;
     }).join("");
-    // attach toggles
-    safeQueryAll(".module-item", moduleListEl).forEach(li => {
+    // toggles
+    $$(".module-item", moduleListEl).forEach(li => {
       li.addEventListener("click", () => {
         const id = li.dataset.module;
-        if (!id) return;
-        if (state.filters.modules.has(id)) {
-          state.filters.modules.delete(id);
-          li.classList.remove("selected");
-        } else {
-          state.filters.modules.add(id);
-          li.classList.add("selected");
-        }
+        if(!id) return;
+        if(state.filters.modules.has(id)){ state.filters.modules.delete(id); li.classList.remove("selected"); }
+        else { state.filters.modules.add(id); li.classList.add("selected"); }
         renderCurrent();
       });
     });
   }
 
-  /* ---------- Type filters (checkboxes) ---------- */
-  function getTypeCheckboxes() {
-    return safeQueryAll(".filter-type");
-  }
-  function attachTypeHandlers() {
+  /* --- type filters --- */
+  function getTypeCheckboxes(){ return $$(".filter-type"); }
+  function attachTypeHandlers(){
     getTypeCheckboxes().forEach(cb => {
       cb.addEventListener("change", () => {
         const boxes = getTypeCheckboxes();
-        state.filters.types = new Set(boxes.filter(x => x.checked).map(x => x.value));
+        state.filters.types = new Set(boxes.filter(x=>x.checked).map(x=>x.value));
         renderCurrent();
       });
     });
   }
 
-  /* ---------- Search ---------- */
-  function attachSearch() {
-    if (!globalSearch) return;
+  /* --- search --- */
+  function attachSearch(){
+    if(!globalSearch) return;
     globalSearch.addEventListener("input", e => {
-      state.filters.q = (e.target.value || "").trim().toLowerCase();
+      state.filters.q = (e.target.value||"").trim().toLowerCase();
       renderCurrent();
     });
   }
 
-  /* ---------- Cards & status ---------- */
-  const ICON_MAP = { quiz: "fa-list-check", lesson: "fa-book-open", video: "fa-play", meeting: "fa-users" };
-
-  function getStatusTagHtml(item) {
+  /* --- cards / status --- */
+  const ICON_MAP = { quiz:"fa-list-check", lesson:"fa-book-open", video:"fa-play", meeting:"fa-users" };
+  function getStatusTagHtml(item){
     const prog = loadProgress();
     const done = !!prog[item.id];
-    if (item.mediaType === "quiz") {
-      const total = (item.questions || []).length || 0;
-      if (done) {
+    if(item.mediaType === "quiz"){
+      const total = (item.questions||[]).length||0;
+      if(done){
         const score = prog[item.id + "_score"] || `${total}/${total}`;
         return `<div class="status-tag status-complete"><span class="icon"><i class="fa-solid fa-circle-check"></i></span><span class="status-num">completed: ${escapeHtml(score)}</span></div>`;
       } else {
         return `<div class="status-tag status-incomplete"><span class="icon"><i class="fa-solid fa-circle-xmark"></i></span><span class="status-num">incomplete: -/${total}</span></div>`;
       }
     } else {
-      if (done) return `<div class="status-tag status-complete"><span class="icon"><i class="fa-solid fa-circle-check"></i></span><span class="status-num">completed</span></div>`;
+      if(done) return `<div class="status-tag status-complete"><span class="icon"><i class="fa-solid fa-circle-check"></i></span><span class="status-num">completed</span></div>`;
       return `<div class="status-tag status-incomplete"><span class="icon"><i class="fa-regular fa-circle-xmark"></i></span><span class="status-num">incomplete</span></div>`;
     }
   }
-
-  function makeCard(item) {
+  function makeCard(item){
     const topColor = item.moduleColor || "#777";
     return `
       <article class="module-card" data-id="${escapeHtml(item.id)}" data-media="${escapeHtml(item.mediaType)}">
         <div class="top" style="background:${topColor}">
           <div class="unit">${escapeHtml(item.unit)} • ${escapeHtml(item.moduleName)}</div>
-          <div class="media-icon"><i class="fa-solid ${ICON_MAP[item.mediaType] || 'fa-file'}"></i></div>
+          <div class="media-icon"><i class="fa-solid ${ICON_MAP[item.mediaType]||'fa-file'}"></i></div>
         </div>
         <div class="body">
           <div class="title">${escapeHtml(item.title)}</div>
           ${getStatusTagHtml(item)}
-          <div class="desc">${escapeHtml(item.description || "")}</div>
-          <div class="chips">${(item.tags || []).map(t => `<div class="chip">${escapeHtml(t)}</div>`).join("")}</div>
+          <div class="desc">${escapeHtml(item.description||"")}</div>
+          <div class="chips">${(item.tags||[]).map(t=>`<div class="chip">${escapeHtml(t)}</div>`).join("")}</div>
         </div>
       </article>
     `;
   }
 
-  /* ---------- Rendering templates ---------- */
-  function homeTemplate() {
-    const preview = DATA.slice(0, 6).map(makeCard).join("");
+  /* --- templates --- */
+  function homeTemplate(){
+    const preview = DATA.slice(0,6).map(makeCard).join("");
     return `
-      <div class="page-transition card">
-        <h1>Why Us</h1>
-        <p class="muted">Epsilon helps FBLA students learn business fundamentals quickly.</p>
-      </div>
-      <div class="card">
-        <h3>Featured</h3>
-        <div class="carousel" aria-hidden="false">
-          <div class="carousel-track" style="display:flex;gap:12px;overflow:hidden">
-            ${preview}${preview}
-          </div>
-        </div>
+      <div class="page-transition card"><h1>Why Us</h1><p class="muted">Epsilon helps FBLA students learn business fundamentals quickly.</p></div>
+      <div class="card"><h3>Featured</h3>
+        <div class="carousel"><div class="carousel-track" id="featured-track">${preview}${preview}</div></div>
       </div>
     `;
   }
 
-  function dashboardTemplate() {
+  function dashboardTemplate(){
+    // select 2 unfinished lessons + 1 unfinished quiz
     const prog = loadProgress();
-    const completed = Object.keys(prog).filter(k => !k.endsWith("_score") && prog[k]).length;
+    const unfinishedLessons = DATA.filter(d => d.mediaType === "lesson" && !prog[d.id]);
+    const unfinishedQuizzes = DATA.filter(d => d.mediaType === "quiz" && !prog[d.id]);
+    const randPick = (arr, n) => {
+      const a = arr.slice(); const out = [];
+      while(out.length < n && a.length) out.push(a.splice(Math.floor(Math.random()*a.length),1)[0]);
+      return out;
+    };
+    let picks = [];
+    picks = picks.concat(randPick(unfinishedLessons, 2));
+    picks = picks.concat(randPick(unfinishedQuizzes, 1));
+    // fallback if not enough: pick random items (prefer lessons/quizzes)
+    if(picks.length < 3){
+      const fallbackPool = DATA.filter(d => d.mediaType === "lesson" || d.mediaType === "quiz");
+      picks = picks.concat(randPick(fallbackPool.filter(x=>!picks.includes(x)), 3 - picks.length));
+    }
+    const htmlCards = picks.map(makeCard).join("");
+    const completedCount = Object.keys(prog).filter(k => !k.endsWith("_score") && prog[k]).length;
     const streak = computeStreak();
-    const badges = computeBadges(prog).map(b => `<div class="metric">${escapeHtml(b)}</div>`).join("");
-    const schedule = loadSchedule();
     return `
       <div class="page-transition">
         <div class="card"><h2>Dashboard</h2>
-          <div style="margin-top:12px">
-            <div class="metric">Completed: <strong>${completed}</strong></div>
-            <div class="metric">Streak: <strong>${streak}</strong></div>
-          </div>
+          <div style="margin-top:12px"><div class="metric">Completed: <strong>${completedCount}</strong></div><div class="metric">Streak: <strong>${streak}</strong></div></div>
         </div>
 
         <div class="card" style="margin-top:12px">
-          <h3>Scheduled</h3>
-          ${schedule.length ? schedule.map(s => `<div class="card">${escapeHtml(s.title)}<div class="muted">${escapeHtml(s.date)} ${escapeHtml(s.time)} EST • ${escapeHtml(s.teacher || "TBA")}</div></div>`).join("") : "<div class='muted'>No scheduled events</div>"}
-        </div>
-      </div>
-      <div class="card"><h3>Badges</h3>${badges}</div>
-    `;
-  }
-
-  function resourcesTemplate() {
-    return `
-      <div class="page-transition">
-        <div class="card"><h2>Resources</h2><p class="muted">Filter on left. Click a card to open.</p></div>
-        <div id="resources-grid" class="grid" aria-live="polite"></div>
-      </div>
-    `;
-  }
-
-  function schedulerTemplate() {
-    return `
-      <div class="page-transition card">
-        <h2>Scheduler</h2>
-        <div style="display:flex;flex-direction:column;gap:8px">
-          <input id="sched-title" class="sidebar-search" placeholder="Title">
-          <input id="sched-date" type="date" class="sidebar-search">
-          <input id="sched-time" type="time" class="sidebar-search">
-          <input id="sched-teacher" class="sidebar-search" placeholder="Teacher">
-          <div><button id="sched-create" class="btn-small">Create & Schedule</button></div>
+          <h3>Recommended Lessons & Quiz</h3>
+          <div class="grid">${htmlCards}</div>
         </div>
       </div>
     `;
   }
 
-  function forYouTemplate() {
-    const lessons = DATA.filter(d => d.mediaType === "lesson");
-    const quizzes = DATA.filter(d => d.mediaType === "quiz");
-    const pick = (arr, n) => { const a = arr.slice(); const out = []; while (out.length < n && a.length) out.push(a.splice(Math.floor(Math.random() * a.length), 1)[0]); return out; };
-    const ls = pick(lessons, 3), qs = pick(quizzes, 3);
-    return `
-      <div class="page-transition card"><h2>For You</h2></div>
-      <h3>Lessons</h3><div class="grid">${ls.map(makeCard).join("")}</div>
-      <h3 style="margin-top:12px">Quizzes</h3><div class="grid">${qs.map(makeCard).join("")}</div>
-    `;
+  function resourcesTemplate(){
+    return `<div class="page-transition">
+      <div class="card"><h2>Resources</h2><p class="muted">Filter by type + module on the left. Click a card to open.</p></div>
+      <div id="resources-grid" class="grid"></div>
+    </div>`;
   }
 
-  /* ---------- Router & navigation ---------- */
-  function setActiveNav(page) {
-    navItems.forEach(n => n.classList.toggle("active", n.dataset.page === page));
-    // update indicator
-    updateNavIndicator();
+  function schedulerTemplate(){
+    return `<div class="page-transition card"><h2>Scheduler</h2>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <input id="sched-title" class="sidebar-search" placeholder="Title"/>
+        <input id="sched-date" type="date" class="sidebar-search"/>
+        <input id="sched-time" type="time" class="sidebar-search"/>
+        <input id="sched-teacher" class="sidebar-search" placeholder="Teacher"/>
+        <div><button id="sched-create" class="btn-small">Create & Schedule</button></div>
+      </div>
+    </div>`;
   }
 
-  function navigateTo(pageName) {
-    // defensive: pageName fallback
-    const page = pageName || "epsilon";
-    state.page = page;
-    setActiveNav(page);
+  /* --- navigation & router --- */
+  function setActiveNav(page){
+    document.querySelectorAll(".nav-item").forEach(n => n.classList.toggle("active", n.dataset.page === page));
+    setTimeout(updateNavIndicator, 8);
+  }
 
-    // sidebar: hidden on epsilon
-    if (leftPanel) {
-      if (page === "epsilon") {
-        leftPanel.classList.remove("expanded");
-        leftPanel.classList.add("collapsed");
-        leftPanel.setAttribute("aria-hidden", "true");
-      } else {
-        leftPanel.classList.remove("collapsed");
-        leftPanel.classList.add("expanded");
-        leftPanel.setAttribute("aria-hidden", "false");
-      }
+  function showSidebar(show){
+    if(!leftPanel) return;
+    if(show){
+      leftPanel.classList.remove("collapsed"); leftPanel.classList.add("expanded");
+      document.querySelector(".container")?.classList.add("resources");
+      document.querySelector(".container")?.classList.remove("single");
+    } else {
+      leftPanel.classList.remove("expanded"); leftPanel.classList.add("collapsed");
+      document.querySelector(".container")?.classList.remove("resources");
+      document.querySelector(".container")?.classList.add("single");
     }
-
-    // render content
-    renderPage(page);
   }
 
-  function renderPage(name) {
-    if (!pageRoot) return;
-    if (name === "epsilon") pageRoot.innerHTML = homeTemplate();
-    else if (name === "dashboard") pageRoot.innerHTML = dashboardTemplate();
-    else if (name === "resources") pageRoot.innerHTML = resourcesTemplate();
-    else if (name === "scheduler") pageRoot.innerHTML = schedulerTemplate();
-    else if (name === "forYou") pageRoot.innerHTML = forYouTemplate();
+  function navigateTo(page){
+    const p = page || "epsilon";
+    state.page = p;
+    setActiveNav(p);
+    // sidebar only on resources
+    showSidebar(p === "resources");
+    renderPage(p);
+  }
+
+  function renderPage(name){
+    if(!pageRoot) return;
+    if(name === "epsilon") pageRoot.innerHTML = homeTemplate();
+    else if(name === "dashboard") pageRoot.innerHTML = dashboardTemplate();
+    else if(name === "resources") pageRoot.innerHTML = resourcesTemplate();
+    else if(name === "scheduler") pageRoot.innerHTML = schedulerTemplate();
     else pageRoot.innerHTML = `<div class="card">Page not found</div>`;
-
-    // after render wiring
-    setTimeout(() => afterRender(name), 40);
+    setTimeout(()=> afterRender(name), 50);
   }
 
-  /* ---------- After-render wiring ---------- */
-  function afterRender(name) {
-    // attach scheduler create
-    if (name === "scheduler") {
-      const createBtn = safeQuery("#sched-create");
-      if (createBtn) {
-        createBtn.addEventListener("click", () => {
-          const title = (safeQuery("#sched-title")?.value || "").trim();
-          const date = safeQuery("#sched-date")?.value || "";
-          const time = safeQuery("#sched-time")?.value || "";
-          const teacher = (safeQuery("#sched-teacher")?.value || "").trim();
-          if (!title || !date || !time) return alert("Please fill title, date and time");
-          const arr = loadSchedule(); arr.push({ id: "s" + Date.now(), title, date, time, teacher }); saveSchedule(arr);
-          alert("Scheduled");
-          navigateTo("dashboard");
-        });
-      }
+  /* --- after render wiring --- */
+  function afterRender(name){
+    // scheduler create
+    if(name === "scheduler"){
+      $("#sched-create")?.addEventListener("click", ()=>{
+        const title = $("#sched-title")?.value.trim();
+        const date = $("#sched-date")?.value;
+        const time = $("#sched-time")?.value;
+        const teacher = $("#sched-teacher")?.value.trim();
+        if(!title || !date || !time) return alert("Fill title, date, time");
+        const arr = loadSchedule(); arr.push({ id:"s"+Date.now(), title, date, time, teacher }); saveSchedule(arr); alert("Scheduled"); navigateTo("dashboard");
+      });
     }
 
-    // populate resources grid if needed
-    if (name === "resources") populateResources();
+    // resources grid populate
+    if(name === "resources") populateResources();
 
-    // attach delegated click for cards
-    // remove previous handler then add
+    // carousel: if featured exists (home), start CSS animation left-loop
+    const fTrack = $("#featured-track");
+    if(fTrack){
+      // ensure duplicated content length >= 2x for smooth loop; already duplicated in template
+      const totalWidth = fTrack.scrollWidth;
+      // animation duration proportional to content width
+      const duration = Math.max(18, Math.round(totalWidth / 120)); // seconds
+      fTrack.classList.add("animated");
+      fTrack.style.animationDuration = duration + "s";
+      // make track width double (it is already duplicated)
+    }
+
+    // delegated click for module cards (works on all pages)
     pageRoot.removeEventListener("click", pageClickHandler);
     pageRoot.addEventListener("click", pageClickHandler);
 
-    // re-attach search (if sidebar exists but may be expanded)
+    // re-attach search (sidebar might be visible)
     attachSearch();
   }
 
-  function pageClickHandler(e) {
+  function pageClickHandler(e){
     const card = e.target.closest(".module-card");
-    if (!card) return;
+    if(!card) return;
     const id = card.dataset.id;
-    if (!id) return;
+    if(!id) return;
     const item = DATA.find(d => d.id === id);
-    if (!item) return;
-    // open viewers
-    if (item.mediaType === "lesson") openLesson(item);
-    else if (item.mediaType === "quiz") openQuiz(item);
+    if(!item) return;
+    if(item.mediaType === "lesson") openLesson(item);
+    else if(item.mediaType === "quiz") openQuiz(item);
     else openGeneric(item);
   }
 
-  /* ---------- Resources population ---------- */
-  function populateResources() {
-    const grid = safeQuery("#resources-grid");
-    if (!grid) return;
+  /* --- resources population --- */
+  function populateResources(){
+    const grid = $("#resources-grid");
+    if(!grid) return;
     const types = state.filters.types || new Set(["lesson","quiz","video","meeting"]);
     const modulesFilter = state.filters.modules || new Set();
     const q = state.filters.q || "";
     const items = DATA.filter(it => {
-      if (!types.has(it.mediaType)) return false;
-      if (modulesFilter.size && !modulesFilter.has(it.module)) return false;
-      if (q) {
-        const title = (it.title || "").toLowerCase();
-        const tags = (it.tags || []).map(x => x.toLowerCase());
-        if (!title.includes(q) && !tags.some(x => x.includes(q))) return false;
+      if(!types.has(it.mediaType)) return false;
+      if(modulesFilter.size && !modulesFilter.has(it.module)) return false;
+      if(q){
+        const title = (it.title||"").toLowerCase();
+        const tags = (it.tags||[]).map(x=>x.toLowerCase());
+        if(!title.includes(q) && !tags.some(x=>x.includes(q))) return false;
       }
       return true;
     });
     grid.innerHTML = items.length ? items.map(makeCard).join("") : `<div class="card">No items found</div>`;
   }
 
-  /* ---------- Viewers: lesson / quiz / generic ---------- */
-  function openLesson(item) {
-    if (!pageRoot) return;
+  /* --- viewers --- */
+  function openLesson(item){
     pageRoot.innerHTML = `
       <div class="page-transition">
         <div class="card">
@@ -360,16 +319,13 @@
         <div class="card"><button id="mark-done" class="btn-small">Mark Done</button></div>
       </div>
     `;
-    safeQuery("#back-lesson")?.addEventListener("click", () => navigateTo("resources"));
-    safeQuery("#mark-done")?.addEventListener("click", () => {
-      const p = loadProgress(); p[item.id] = true; saveProgress(p);
-      alert("Lesson marked complete");
-      navigateTo("dashboard");
+    $("#back-lesson")?.addEventListener("click", ()=> navigateTo("resources"));
+    $("#mark-done")?.addEventListener("click", ()=>{
+      const p = loadProgress(); p[item.id] = true; saveProgress(p); alert("Marked done"); navigateTo("dashboard");
     });
   }
 
-  function openQuiz(item) {
-    if (!pageRoot) return;
+  function openQuiz(item){
     const qs = item.questions || [];
     let answers = Array(qs.length).fill(null);
     pageRoot.innerHTML = `
@@ -379,154 +335,126 @@
           <div style="margin-top:8px"><div class="muted">${escapeHtml(item.unit)} • ${escapeHtml(item.moduleName)}</div><h2>${escapeHtml(item.title)}</h2></div>
         </div>
         <div id="questions-area">
-          ${qs.map((q,i) => `
+          ${qs.map((q,i)=>`
             <div class="question" data-q="${i}">
               <div style="font-weight:700">Q${i+1}. ${escapeHtml(q.q)}</div>
-              <div class="options">
-                ${q.options.map((opt,oi) => `<div class="opt" data-qi="${i}" data-oi="${oi}">${escapeHtml(opt)}</div>`).join("")}
-              </div>
-            </div>`).join("")}
+              <div class="options">${q.options.map((opt,oi)=>`<div class="opt" data-qi="${i}" data-oi="${oi}">${escapeHtml(opt)}</div>`).join("")}</div>
+            </div>
+          `).join("")}
         </div>
         <div style="display:flex;gap:10px"><button id="submit-quiz" class="btn-small">Submit</button><button id="cancel-quiz" class="btn-small btn-light">Cancel</button></div>
       </div>
     `;
-    safeQuery("#back-quiz")?.addEventListener("click", () => navigateTo("resources"));
-    safeQuery("#cancel-quiz")?.addEventListener("click", () => navigateTo("resources"));
+    $("#back-quiz")?.addEventListener("click", ()=> navigateTo("resources"));
+    $("#cancel-quiz")?.addEventListener("click", ()=> navigateTo("resources"));
 
-    // attach option handlers
-    safeQueryAll(".opt").forEach(el => {
+    // options
+    $$(".opt").forEach(el => {
       el.addEventListener("click", () => {
-        const qi = +el.dataset.qi;
-        const oi = +el.dataset.oi;
+        const qi = +el.dataset.qi, oi = +el.dataset.oi;
         answers[qi] = oi;
-        // visual toggle
-        safeQueryAll(`.question[data-q="${qi}"] .opt`).forEach(o => o.classList.remove("selected"));
+        $(`.question[data-q="${qi}"]`).querySelectorAll(".opt").forEach(o=>o.classList.remove("selected"));
         el.classList.add("selected");
       });
     });
 
-    // submit -> save progress and show results + review
-    safeQuery("#submit-quiz")?.addEventListener("click", () => {
+    $("#submit-quiz")?.addEventListener("click", ()=> {
       let correct = 0;
-      qs.forEach((q,i) => { if (answers[i] === q.answer) correct++; });
+      qs.forEach((q,i)=> { if(answers[i] === q.answer) correct++; });
       const total = qs.length || 0;
-      const percent = total ? Math.round((correct/total) * 100) : 0;
+      const percent = total ? Math.round((correct/total)*100) : 0;
       const p = loadProgress(); p[item.id] = true; p[item.id + "_score"] = `${correct}/${total}`; saveProgress(p);
-
-      // results UI
+      // results
       pageRoot.innerHTML = `
         <div class="page-transition">
-          <div class="card result">
-            <h2>Result</h2>
-            <div style="font-size:28px;font-weight:700">${percent}%</div>
-            <div style="margin-top:8px">${correct} / ${total} correct</div>
+          <div class="card result"><h2>Result</h2><div style="font-size:28px;font-weight:700">${percent}%</div><div style="margin-top:8px">${correct} / ${total} correct</div>
             <div style="margin-top:12px"><button id="review-btn" class="btn-small">Review answers</button> <button id="back-list" class="btn-small btn-light">Back</button></div>
           </div>
           <div id="review-area" style="margin-top:12px"></div>
         </div>
       `;
-      safeQuery("#back-list")?.addEventListener("click", () => navigateTo("resources"));
-      safeQuery("#review-btn")?.addEventListener("click", () => renderReview(qs, answers));
+      $("#back-list")?.addEventListener("click", ()=> navigateTo("resources"));
+      $("#review-btn")?.addEventListener("click", ()=> renderReview(qs, answers));
     });
   }
 
-  function renderReview(questions, answers) {
-    const area = safeQuery("#review-area");
-    if (!area) return;
-    area.innerHTML = questions.map((q,i) => {
+  function renderReview(questions, answers){
+    const area = $("#review-area");
+    if(!area) return;
+    area.innerHTML = questions.map((q,i)=>{
       const user = answers[i];
       const correct = q.answer;
       const isCorrect = user === correct;
-      return `
-        <div class="question" style="margin-bottom:10px">
-          <div style="font-weight:700">Q${i+1}. ${escapeHtml(q.q)}</div>
-          <div style="margin-top:8px">
-            ${q.options.map((opt,oi) => {
-              let mark = "";
-              let cls = "";
-              if (oi === correct) { mark = "✅"; cls = "review-correct"; }
-              else if (oi === user && !isCorrect) { mark = "❌"; cls = "review-wrong"; }
-              return `<div style="padding:8px;border-radius:8px;margin-top:6px;background:#fff;border:1px solid rgba(0,0,0,0.04)">${mark} <strong class="${cls}">${escapeHtml(opt)}</strong></div>`;
-            }).join("")}
-          </div>
-        </div>`;
+      return `<div class="question" style="margin-bottom:10px"><div style="font-weight:700">Q${i+1}. ${escapeHtml(q.q)}</div>
+        <div style="margin-top:8px">${q.options.map((opt,oi)=>{
+          let mark = ""; let cls = "";
+          if(oi === correct){ mark = "✅"; cls = "review-correct"; }
+          else if(oi === user && !isCorrect){ mark = "❌"; cls = "review-wrong"; }
+          return `<div style="padding:8px;border-radius:8px;margin-top:6px;background:#fff;border:1px solid rgba(0,0,0,0.04)">${mark} <strong class="${cls}">${escapeHtml(opt)}</strong></div>`;
+        }).join("")}</div></div>`;
     }).join("");
-    area.scrollIntoView({ behavior: "smooth" });
+    $("#review-area")?.scrollIntoView({ behavior: "smooth" });
   }
 
-  function openGeneric(item) {
-    if (!pageRoot) return;
-    pageRoot.innerHTML = `
-      <div class="page-transition card">
-        <button class="btn-back" id="back-generic"><span class="arrow">◀</span>Back</button>
-        <div style="margin-top:10px"><div class="muted">${escapeHtml(item.unit)} • ${escapeHtml(item.moduleName)}</div><h2>${escapeHtml(item.title)}</h2><p class="muted">${escapeHtml(item.description || "")}</p></div>
-      </div>
-    `;
-    safeQuery("#back-generic")?.addEventListener("click", () => navigateTo("resources"));
+  function openGeneric(item){
+    pageRoot.innerHTML = `<div class="page-transition card"><button class="btn-back" id="back-gen"><span class="arrow">◀</span>Back</button>
+      <div style="margin-top:10px"><div class="muted">${escapeHtml(item.unit)} • ${escapeHtml(item.moduleName)}</div><h2>${escapeHtml(item.title)}</h2><p class="muted">${escapeHtml(item.description||"")}</p></div></div>`;
+    $("#back-gen")?.addEventListener("click", ()=> navigateTo("resources"));
   }
 
-  /* ---------- Streak & badges ---------- */
-  function computeStreak() {
-    try {
+  /* --- streak & badges --- */
+  function computeStreak(){
+    try{
       const raw = localStorage.getItem("eps_visits_v1");
       const visits = raw ? JSON.parse(raw) : [];
       const today = new Date().toISOString().slice(0,10);
-      if (!visits.includes(today)) visits.push(today);
+      if(!visits.includes(today)) visits.push(today);
       const uniq = Array.from(new Set(visits));
       localStorage.setItem("eps_visits_v1", JSON.stringify(uniq));
-      let streak = 0;
-      let d = new Date();
-      while (true) {
+      let streak = 0; let d = new Date();
+      while(true){
         const iso = d.toISOString().slice(0,10);
-        if (uniq.includes(iso)) { streak++; d.setDate(d.getDate()-1); } else break;
+        if(uniq.includes(iso)){ streak++; d.setDate(d.getDate()-1); } else break;
       }
       return streak;
-    } catch { return 0; }
+    }catch{return 0;}
   }
-
-  function computeBadges(progress) {
-    const doneCount = Object.keys(progress).filter(k => !k.endsWith("_score") && progress[k]).length;
+  function computeBadges(progress){
+    const doneCount = Object.keys(progress).filter(k=>!k.endsWith("_score") && progress[k]).length;
     const out = [];
-    if (doneCount >= 1) out.push("First Step");
-    if (doneCount >= 3) out.push("Learner");
-    if (doneCount >= 6) out.push("Dedicated");
+    if(doneCount>=1) out.push("First Step");
+    if(doneCount>=3) out.push("Learner");
+    if(doneCount>=6) out.push("Dedicated");
     return out;
   }
 
-  /* ---------- Render current helpers ---------- */
-  function renderCurrent() {
-    if (state.page === "resources") populateResources();
-    else if (state.page === "forYou") renderPage("forYou");
+  /* --- render helpers --- */
+  function renderCurrent(){ if(state.page === "resources") populateResources(); }
+
+  /* --- init wiring --- */
+  function wireNav(){
+    document.querySelectorAll(".nav-item").forEach(it=>{
+      it.addEventListener("click", () => {
+        const page = it.dataset.page || "epsilon";
+        navigateTo(page);
+      });
+    });
   }
 
-  /* ---------- Init and wiring ---------- */
-  function wireNavClicks() {
-  document.querySelectorAll(".nav-item").forEach(it => {
-    it.addEventListener("click", () => {
-      const page = it.dataset.page;
-      navigateTo(page);
-    });
-  });
-}
-
-
-  async function init() {
+  async function init(){
     await loadData();
     buildModules();
     attachTypeHandlers();
     attachSearch();
-    wireNavClicks();
-    // initial nav indicator placement
-    setTimeout(() => {
-      updateNavIndicator();
-      // remove no-animate if present
-      navIndicator?.classList.remove("no-animate");
-    }, 120);
-    // start on epsilon (home)
+    wireNav();
+    setTimeout(()=>{ updateNavIndicator(); navIndicator?.classList.remove("no-animate"); }, 120);
+    // start on epsilon, sidebar hidden
+    document.querySelector(".container")?.classList.add("single");
     navigateTo("epsilon");
   }
 
-  // start
-  init();
+  /* --- helpers $ $$ for internal scope --- */
+  window.$ = $; window.$$ = $$; // expose for debugging if needed
 
+  init();
 })();
