@@ -160,3 +160,18 @@ button.btn-light{background:#f1f1f1;color:#111}
   .main-content{order:1;padding:12px}
   .container.no-sidebar{padding:12px}
 }
+
+/* REMOVE SIDEBAR GAP FOR NON-RESOURCES PAGES */
+body:not(.page-resources) .container {
+    padding-left: 0 !important;
+}
+
+body:not(.page-resources) .left-panel {
+    display: none !important;
+}
+
+body:not(.page-resources) #page-root {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+}
+
