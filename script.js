@@ -1,61 +1,103 @@
-// SPA + renderer + quiz engine
-// safe, defensive, and wrapped so it never crashes if data fails
-
+// SPA, filters, data loader, progress & scheduler (localStorage)
+// version 1.0.5
 window.addEventListener("DOMContentLoaded", () => {
-  const version = "1.0.0";
-  console.log("Epsilon SPA v" + version);
-
-  const indicator = document.querySelector(".nav-indicator");
-  const navItems = document.querySelectorAll(".nav-item");
+  const DATA_URL = "data.json?v=" + Date.now();
   const pageRoot = document.getElementById("page-root");
-
-  const ICON_MAP = {
-    quiz: "fa-list-check",
-    lesson: "fa-book-open",
-    video: "fa-play",
-    meeting: "fa-users"
+  const navItems = document.querySelectorAll(".nav-item");
+  const moduleListEl = document.getElementById("module-list");
+  const searchInput = document.getElementById("global-search");
+  const filterTypeEls = document.querySelectorAll(".filter-type");
+  let DATA = [];
+  let MODULES = {}; // moduleId -> {moduleName, color}
+  let state = {
+    page: "epsilon",
+    filters: { types: new Set(["lesson","quiz","video","meeting"]), modules: new Set(), q:"" }
   };
 
-  let DATA = []; // loaded JSON
+  // localStorage keys
+  const LS_PROGRESS = "eps_progress_v1";
+  const LS_SCHEDULE = "eps_schedule_v1";
 
-  function safeFetchData() {
-    return fetch("data.json?v=" + Date.now())
-      .then(r => r.json())
-      .catch(err => {
-        console.error("Failed to load data.json", err);
-        return [];
+  // util
+  const $ = s => document.querySelector(s);
+  const $$ = s => Array.from(document.querySelectorAll(s));
+
+  function fetchData(){
+    return fetch(DATA_URL).then(r=>{
+      if(!r.ok) throw new Error("data.json not found");
+      return r.json();
+    }).catch(err=>{
+      console.warn("Failed to load data.json:", err);
+      return [];
+    });
+  }
+
+  // build module list from data
+  function buildModules(data){
+    MODULES = {};
+    data.forEach(it=>{
+      const m = it.module || "00";
+      if(!MODULES[m]) MODULES[m] = { moduleName: it.moduleName || ("Module " + m), color: it.moduleColor || "#777" };
+    });
+    // sort by module id
+    const keys = Object.keys(MODULES).sort();
+    moduleListEl.innerHTML = keys.map(k=>{
+      const m = MODULES[k];
+      return `<li data-module="${k}" class="module-item"><span class="module-dot" style="background:${m.color}"></span>${k} ${m.moduleName}</li>`;
+    }).join("");
+    // attach click handlers
+    $$(".module-item").forEach(li=>{
+      li.addEventListener("click", ()=>{
+        const id = li.dataset.module;
+        // toggle in filters
+        if(state.filters.modules.has(id)) state.filters.modules.delete(id);
+        else state.filters.modules.add(id);
+        // visual toggle
+        li.classList.toggle("selected");
+        renderCurrent();
       });
+    });
   }
 
-  function moveIndicator(el) {
-    if (!el || !indicator) return;
-    const rect = el.getBoundingClientRect();
-    const parent = el.parentElement.getBoundingClientRect();
-    indicator.style.width = Math.round(rect.width) + "px";
-    indicator.style.transform = `translateX(${Math.round(rect.left - parent.left)}px)`;
+  // filtering
+  function getActiveTypes(){
+    const set = new Set();
+    filterTypeEls.forEach(cb => { if(cb.checked) set.add(cb.value); });
+    return set;
   }
 
-  function ensureActive() {
-    let active = document.querySelector(".nav-item.active");
-    if (!active) {
-      active = navItems[0];
-      active.classList.add("active");
-    }
-    return active;
-  }
+  filterTypeEls.forEach(cb=>{
+    cb.addEventListener("change", ()=> {
+      state.filters.types = getActiveTypes();
+      renderCurrent();
+    });
+  });
 
-  // render helpers
-  function makeCard(item) {
-    const topColor = item.moduleColor || "#333";
-    const iconClass = ICON_MAP[item.mediaType] || "fa-file";
-    const unitLabel = `${item.unit} • ${item.moduleName}`;
+  searchInput.addEventListener("input", (e)=>{
+    state.filters.q = (e.target.value||"").trim().toLowerCase();
+    renderCurrent();
+  });
+
+  // localStorage helpers
+  function loadProgress(){ try{ return JSON.parse(localStorage.getItem(LS_PROGRESS))||{} }catch{ return {}; } }
+  function saveProgress(obj){ localStorage.setItem(LS_PROGRESS, JSON.stringify(obj)); }
+  function loadSchedule(){ try{ return JSON.parse(localStorage.getItem(LS_SCHEDULE))||[] }catch{ return []; } }
+  function saveSchedule(arr){ localStorage.setItem(LS_SCHEDULE, JSON.stringify(arr)); }
+  function clearProgress(){ localStorage.removeItem(LS_PROGRESS); location.reload(); }
+  function clearSchedule(){ localStorage.removeItem(LS_SCHEDULE); location.reload(); }
+
+  $("#clear-progress").addEventListener("click", ()=> { if(confirm("Clear all progress?")) clearProgress(); });
+  $("#clear-schedule").addEventListener("click", ()=> { if(confirm("Clear all schedule entries?")) clearSchedule(); });
+
+  // helpers for rendering cards
+  const ICON_MAP = { quiz: "fa-list-check", lesson: "fa-book-open", video: "fa-play", meeting: "fa-users" };
+  function makeCard(item){
+    const topColor = item.moduleColor || "#777";
     return `
-      <article class="module-card" role="article" data-id="${item.id}" data-media="${item.mediaType}">
+      <article class="module-card" data-id="${item.id}" data-media="${item.mediaType}">
         <div class="top" style="background:${topColor}">
-          <div class="unit">${unitLabel}</div>
-          <div class="media-icon" title="${item.mediaType}">
-            <i class="fa-solid ${iconClass}"></i>
-          </div>
+          <div class="unit">${item.unit} • ${item.moduleName}</div>
+          <div class="media-icon"><i class="fa-solid ${ICON_MAP[item.mediaType]||'fa-file'}"></i></div>
         </div>
         <div class="body">
           <div class="title">${escapeHtml(item.title)}</div>
@@ -65,248 +107,328 @@ window.addEventListener("DOMContentLoaded", () => {
       </article>
     `;
   }
+  function escapeHtml(s){ if(!s) return ""; return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]); }
 
-  function escapeHtml(s){
-    if(!s) return "";
-    return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
-  }
-
-  function renderGrid(items) {
-    if (!items || items.length === 0) return `<div class="card">No items found.</div>`;
-    return `<div class="grid">${items.map(it => makeCard(it)).join("")}</div>`;
-  }
-
-  // page templates
-  function homeTemplate() {
-    return `<div class="page-transition">
-      <div class="card"><h1>Welcome to Epsilon</h1><p class="muted">Business learning — curated modules, quizzes and lessons.</p></div>
-      <div class="card"><h3>Quick access</h3><p class="muted">Use the tabs above to browse For You, Lessons, Quizzes, Videos and Meetings.</p></div>
-    </div>`;
-  }
-
-  function forYouTemplate(data) {
-    const lessons = data.filter(i=> i.mediaType === "lesson");
-    const quizzes = data.filter(i=> i.mediaType === "quiz");
-    const pick = (arr, n)=> {
-      const copy = arr.slice();
-      const out=[];
-      while(out.length < n && copy.length){
-        const i = Math.floor(Math.random()*copy.length);
-        out.push(copy.splice(i,1)[0]);
-      }
-      return out;
-    };
-    const selLessons = pick(lessons,3);
-    const selQuizzes = pick(quizzes,3);
-    return `<div class="page-transition">
-      <div class="card"><h2>For You</h2><p class="muted">Random recommendations — 3 lessons and 3 quizzes.</p></div>
-      <h3 style="margin-top:12px">Lessons</h3>
-      ${renderGrid(selLessons)}
-      <h3 style="margin-top:16px">Quizzes</h3>
-      ${renderGrid(selQuizzes)}
-    </div>`;
-  }
-
-  function listTemplate(data, type, heading) {
-    const items = data.filter(i=> i.mediaType === type);
-    return `<div class="page-transition">
-      <div class="card"><h2>${heading}</h2><p class="muted">Tap a card to open.</p></div>
-      ${renderGrid(items)}
-    </div>`;
-  }
-
-  function videosTemplate(data) {
-    const items = data.filter(i=> i.mediaType === "video");
-    return `<div class="page-transition">
-      <div class="card"><h2>Videos</h2></div>
-      ${renderGrid(items)}
-    </div>`;
-  }
-
-  function meetingsTemplate(data) {
-    const items = data.filter(i=> i.mediaType === "meeting");
-    return `<div class="page-transition">
-      <div class="card"><h2>Meetings</h2></div>
-      ${renderGrid(items)}
-    </div>`;
-  }
-
-  // dynamic views: lesson viewer and quiz viewer
-  function openLesson(item) {
-    const html = `
-      <div class="page-transition">
-        <div class="card"><div style="display:flex;justify-content:space-between;align-items:center">
-          <div>
-            <div style="font-size:13px;color:var(--muted)">${escapeHtml(item.unit)} • ${escapeHtml(item.moduleName)}</div>
-            <h2 style="margin:6px 0">${escapeHtml(item.title)}</h2>
+  // primary renderers
+  function homeTemplate(){
+    // carousel duplicates items to allow continuous scroll
+    const sample = DATA.slice(0,8);
+    const cards = sample.map(makeCard).join("");
+    return `
+      <div class="page-hero page-transition">
+        <div class="hero-left card">
+          <h1>Why Us</h1>
+          <p class="muted">Epsilon helps FBLA students learn business fundamentals quickly with bite-sized lessons, quizzes and live study sessions.</p>
+          <div style="margin-top:12px; display:flex; gap:8px;">
+            <button class="btn-small" id="cta-dashboard">Open Dashboard</button>
+            <button class="btn-light" id="cta-resources">Browse Resources</button>
           </div>
-          <div style="width:56px"></div>
-        </div></div>
+        </div>
+        <div class="hero-right card">
+          <h4>Featured</h4>
+          <div id="hero-feature" style="height:180px; display:flex;align-items:center;justify-content:center;color:var(--muted)">Featured meetings & highlights</div>
+        </div>
+      </div>
 
-        <div class="card">${item.contentHtml || "<p>No lesson content yet.</p>"}</div>
-        <div class="card"><button class="btn-back">Back</button></div>
+      <div class="card"><h3>Featured Courses & Quizzes</h3>
+        <div class="carousel" aria-hidden="false">
+          <div class="carousel-track">
+            ${cards}
+            ${cards} <!-- duplicate for smooth scroll -->
+          </div>
+        </div>
       </div>
     `;
-    pageRoot.innerHTML = html;
-    pageRoot.querySelector(".btn-back").addEventListener("click", () => loadPage("lessons"));
   }
 
-  function openQuiz(item) {
-    const questions = item.questions || [];
-    let state = { answers: Array(questions.length).fill(null) };
-
-    function renderQuiz() {
-      return `
-        <div class="page-transition quiz-view">
-          <div class="card"><div style="display:flex;justify-content:space-between;align-items:center">
-            <div>
-              <div style="font-size:13px;color:var(--muted)">${escapeHtml(item.unit)} • ${escapeHtml(item.moduleName)}</div>
-              <h2 style="margin:6px 0">${escapeHtml(item.title)}</h2>
+  function dashboardTemplate(){
+    const progress = loadProgress();
+    const completedCount = Object.keys(progress).filter(k=>progress[k]===true).length;
+    const schedule = loadSchedule();
+    const streak = computeStreak();
+    const badges = computeBadges(progress);
+    return `
+      <div class="page-transition dashboard-grid">
+        <div>
+          <div class="card">
+            <h2>Dashboard</h2>
+            <div style="display:flex;gap:12px;margin-top:12px" class="metrics">
+              <div class="metric"><div style="font-size:20px;font-weight:700">${completedCount}</div><div class="muted">Completed</div></div>
+              <div class="metric"><div style="font-size:20px;font-weight:700">${streak}</div><div class="muted">Streak (days)</div></div>
             </div>
-            <div style="width:56px"></div>
-          </div></div>
-
-          <div id="questions">
-            ${questions.map((q,qi)=>`
-              <div class="question" data-q="${qi}">
-                <div style="font-weight:700">Q${qi+1}. ${escapeHtml(q.q)}</div>
-                <div class="options">
-                  ${q.options.map((o,oi)=>`<div class="opt" data-qi="${qi}" data-oi="${oi}">${escapeHtml(o)}</div>`).join("")}
-                </div>
-              </div>
-            `).join("")}
           </div>
 
-          <div style="display:flex;gap:12px;align-items:center;margin-top:12px">
-            <button id="submit-quiz">Submit</button>
-            <button id="cancel-quiz" class="btn-light">Cancel</button>
-          </div>
-        </div>
-      `;
-    }
-
-    pageRoot.innerHTML = renderQuiz();
-
-    // option click
-    pageRoot.querySelectorAll(".opt").forEach(el=>{
-      el.addEventListener("click", (e)=>{
-        const qi = Number(el.dataset.qi);
-        const oi = Number(el.dataset.oi);
-        state.answers[qi] = oi;
-        // mark selected for that question
-        pageRoot.querySelectorAll(`.question[data-q="${qi}"] .opt`).forEach(o=>{
-          o.classList.remove("selected");
-        });
-        el.classList.add("selected");
-      });
-    });
-
-    pageRoot.querySelector("#cancel-quiz").addEventListener("click", ()=> loadPage("quizzes"));
-
-    pageRoot.querySelector("#submit-quiz").addEventListener("click", ()=>{
-      const total = questions.length;
-      let correct = 0;
-      for(let i=0;i<total;i++){
-        const q = questions[i];
-        if(state.answers[i] === undefined || state.answers[i] === null) continue;
-        if(state.answers[i] === q.answer) correct++;
-      }
-      const score = Math.round((correct/total)*100);
-      pageRoot.innerHTML = `
-        <div class="page-transition">
-          <div class="result">
-            <h2>Result</h2>
-            <div style="font-size:28px;font-weight:700">${score}%</div>
-            <div style="margin-top:8px">${correct} / ${total} correct</div>
-            <div style="margin-top:12px"><button id="review-btn">Review answers</button> <button id="back-list" class="btn-light">Back</button></div>
-          </div>
-        </div>
-      `;
-      document.getElementById("back-list").addEventListener("click", ()=> loadPage("quizzes"));
-      document.getElementById("review-btn").addEventListener("click", ()=> showReview(questions, state));
-    });
-
-    function showReview(questions, state){
-      pageRoot.innerHTML = `
-        <div class="page-transition">
-          <div class="card"><h3>Review</h3></div>
-          ${questions.map((q,qi)=>`
-            <div class="question">
-              <div style="font-weight:700">Q${qi+1}. ${escapeHtml(q.q)}</div>
-              <div style="margin-top:8px"><strong>Your answer:</strong> ${ state.answers[qi] == null ? '<em>Not answered</em>' : escapeHtml(q.options[state.answers[qi]]) }</div>
-              <div style="margin-top:4px"><strong>Correct:</strong> ${escapeHtml(q.options[q.answer])}</div>
+          <div class="card" style="margin-top:12px">
+            <h3>Scheduled Lessons</h3>
+            <div class="schedule-list">
+              ${schedule.length ? schedule.map(s=>`<div class="card"><strong>${escapeHtml(s.title)}</strong><div class="muted">${s.date} ${s.time} EST • ${escapeHtml(s.teacher||'TBA')}</div></div>`).join("") : "<div class='muted'>No scheduled events</div>"}
             </div>
-          `).join("")}
-          <div style="margin-top:12px"><button id="back-to-quiz">Back</button></div>
+          </div>
         </div>
-      `;
-      document.getElementById("back-to-quiz").addEventListener("click", ()=> openQuiz(item));
-    }
+
+        <aside>
+          <div class="card">
+            <h3>Badges</h3>
+            <div class="badges">
+              ${badges.map(b=>`<div class="badge">${escapeHtml(b)}</div>`).join("")}
+            </div>
+          </div>
+          <div class="card" style="margin-top:12px">
+            <h3>Quick Actions</h3>
+            <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px">
+              <button id="view-progress" class="btn-small">Export progress</button>
+              <button id="reset-streak" class="btn-small btn-light">Reset streak</button>
+            </div>
+          </div>
+        </aside>
+      </div>
+    `;
   }
 
-  // top-level renderer
-  function loadPage(name) {
-    if (!DATA) { pageRoot.innerHTML = `<div class="card">Loading…</div>`; return; }
-    const safe = (name||"home").toLowerCase();
-    if (safe === "home") pageRoot.innerHTML = homeTemplate();
-    else if (safe === "foryou") pageRoot.innerHTML = forYouTemplate(DATA);
-    else if (safe === "lessons") pageRoot.innerHTML = listTemplate(DATA, "lesson", "Lessons");
-    else if (safe === "quizzes") pageRoot.innerHTML = listTemplate(DATA, "quiz", "Quizzes");
-    else if (safe === "videos") pageRoot.innerHTML = videosTemplate(DATA);
-    else if (safe === "meetings") pageRoot.innerHTML = meetingsTemplate(DATA);
+  function resourcesTemplate(){
+    return `<div class="page-transition">
+      <div class="card"><h2>Resources</h2><p class="muted">Filter by type and module on the left. Click a card to open.</p></div>
+      <div id="resources-grid" class="grid"></div>
+    </div>`;
+  }
+
+  function schedulerTemplate(){
+    return `<div class="page-transition">
+      <div class="card"><h2>Scheduler</h2><p class="muted">Create a live lesson entry that users can schedule.</p></div>
+      <div class="card">
+        <label>Title<input id="sched-title" class="sidebar-search" /></label>
+        <label>Date<input id="sched-date" type="date" class="sidebar-search" /></label>
+        <label>Time<input id="sched-time" type="time" class="sidebar-search" /></label>
+        <label>Teacher<input id="sched-teacher" class="sidebar-search" /></label>
+        <div style="margin-top:8px"><button id="sched-create" class="btn-small">Create & Schedule</button></div>
+      </div>
+    </div>`;
+  }
+
+  function forYouTemplate(){
+    // pick 3 random lessons and 3 random quizzes
+    const lessons = DATA.filter(d=>d.mediaType==="lesson");
+    const quizzes = DATA.filter(d=>d.mediaType==="quiz");
+    const pick = (arr,n)=>{ const c=arr.slice(); const out=[]; while(out.length<n && c.length){ out.push(c.splice(Math.floor(Math.random()*c.length),1)[0]); } return out; };
+    const l = pick(lessons,3), q = pick(quizzes,3);
+    return `<div class="page-transition">
+      <div class="card"><h2>For You</h2><p class="muted">Recommendations</p></div>
+      <h3>Lessons</h3><div class="grid">${l.map(makeCard).join("")}</div>
+      <h3 style="margin-top:12px">Quizzes</h3><div class="grid">${q.map(makeCard).join("")}</div>
+    </div>`;
+  }
+
+  function renderPage(name){
+    state.page = name;
+    // update nav active
+    navItems.forEach(n=> n.classList.toggle("active", n.dataset.page===name));
+    if(name==="epsilon") pageRoot.innerHTML = homeTemplate();
+    else if(name==="dashboard") pageRoot.innerHTML = dashboardTemplate();
+    else if(name==="resources") pageRoot.innerHTML = resourcesTemplate();
+    else if(name==="scheduler") pageRoot.innerHTML = schedulerTemplate();
+    else if(name==="forYou") pageRoot.innerHTML = forYouTemplate();
     else pageRoot.innerHTML = `<div class="card">Page not found</div>`;
 
-    pageRoot.classList.add("page-transition");
+    // after injection hook
+    afterRender(name);
+  }
 
-    // attach card click handlers
-    setTimeout(()=> { // allow DOM injection
-      pageRoot.querySelectorAll(".module-card").forEach(card=>{
-        card.addEventListener("click", ()=>{
-          const id = card.dataset.id;
-          const item = DATA.find(x=> x.id === id);
-          if (!item) return;
-          if (item.mediaType === "lesson") openLesson(item);
-          else if (item.mediaType === "quiz") openQuiz(item);
-          else {
-            // default viewer
-            pageRoot.innerHTML = `<div class="page-transition"><div class="card"><h2>${escapeHtml(item.title)}</h2><p>${escapeHtml(item.description)}</p></div><div class="card"><button class="btn-back">Back</button></div></div>`;
-            pageRoot.querySelector(".btn-back").addEventListener("click", ()=> loadPage(item.mediaType === "video" ? "videos" : "meetings"));
-          }
+  function afterRender(name){
+    // wire CTA buttons
+    const ctaDash = document.getElementById("cta-dashboard");
+    if(ctaDash) ctaDash.addEventListener("click", ()=> navigate("dashboard"));
+    const ctaRes = document.getElementById("cta-resources");
+    if(ctaRes) ctaRes.addEventListener("click", ()=> navigate("resources"));
+
+    if(name==="resources") populateResources();
+    if(name==="scheduler") {
+      const createBtn = $("#sched-create");
+      if(createBtn){
+        createBtn.addEventListener("click", ()=>{
+          const title = $("#sched-title").value.trim();
+          const date = $("#sched-date").value;
+          const time = $("#sched-time").value;
+          const teacher = $("#sched-teacher").value.trim();
+          if(!title||!date||!time) return alert("Please fill title, date and time");
+          const arr = loadSchedule();
+          arr.push({ id: "s" + Date.now(), title, date, time, teacher});
+          saveSchedule(arr);
+          alert("Scheduled!");
+          renderPage("dashboard");
+        });
+      }
+    }
+
+    // attach card click handler generically
+    setTimeout(()=> {
+      $$(".module-card").forEach(c => {
+        c.addEventListener("click", ()=> {
+          const id = c.dataset.id;
+          const item = DATA.find(d=>d.id===id);
+          if(!item) return;
+          if(item.mediaType==="lesson") openLesson(item);
+          else if(item.mediaType==="quiz") openQuiz(item);
+          else openGeneric(item);
         });
       });
     }, 40);
   }
 
-  // initial setup
-  function initNav() {
-    navItems.forEach(it=>{
-      it.addEventListener("click", (e)=>{
-        const target = e.currentTarget;
-        document.querySelector(".nav-item.active")?.classList.remove("active");
-        target.classList.add("active");
-        moveIndicator(target);
-        loadPage(target.dataset.page);
-      });
+  // render filtered resources into resources grid
+  function populateResources(){
+    const grid = $("#resources-grid");
+    const types = state.filters.types || new Set(["lesson","quiz","video","meeting"]);
+    const modulesFilter = state.filters.modules;
+    const q = state.filters.q || "";
+    const items = DATA.filter(it=>{
+      if(!types.has(it.mediaType)) return false;
+      if(modulesFilter.size && !modulesFilter.has(it.module)) return false;
+      if(q){
+        const inTitle = (it.title||"").toLowerCase().includes(q);
+        const inTags = (it.tags||[]).some(t=>t.toLowerCase().includes(q));
+        if(!inTitle && !inTags) return false;
+      }
+      return true;
     });
+    grid.innerHTML = items.length ? items.map(makeCard).join("") : `<div class="card">No items found</div>`;
+  }
 
-    // ensure indicator placed properly after fonts/layout
-    requestAnimationFrame(()=>{
-      const active = ensureActive();
-      indicator.classList.add("no-animate");
-      moveIndicator(active);
-      requestAnimationFrame(()=> indicator.classList.remove("no-animate"));
+  // open generic viewer for video/meeting
+  function openGeneric(item){
+    pageRoot.innerHTML = `
+      <div class="page-transition card">
+        <button class="btn-back" id="back">Back</button>
+        <div style="margin-top:10px">
+          <div style="font-size:13px;color:var(--muted)">${item.unit} • ${item.moduleName}</div>
+          <h2>${escapeHtml(item.title)}</h2>
+          <p class="muted">${escapeHtml(item.description || "")}</p>
+        </div>
+      </div>
+    `;
+    $("#back").addEventListener("click", ()=> renderPage("resources"));
+  }
+
+  // open lesson
+  function openLesson(item){
+    pageRoot.innerHTML = `
+      <div class="page-transition">
+        <div class="card">
+          <button class="btn-back" id="back">Back</button>
+          <div style="margin-top:8px"><div style="font-size:13px;color:var(--muted)">${item.unit} • ${item.moduleName}</div><h2>${escapeHtml(item.title)}</h2></div>
+        </div>
+        <div class="card">${item.contentHtml || "<p>No content yet.</p>"}</div>
+        <div class="card"><button id="mark-done" class="btn-small">Mark Done</button></div>
+      </div>
+    `;
+    $("#back").addEventListener("click", ()=> renderPage("resources"));
+    $("#mark-done").addEventListener("click", ()=>{
+      const prog = loadProgress(); prog[item.id] = true; saveProgress(prog); alert("Marked done"); renderPage("dashboard");
     });
   }
 
-  // bootstrap
-  Promise.resolve()
-    .then(()=> safeFetchData())
-    .then(json=>{
-      DATA = Array.isArray(json) ? json : [];
-      initNav();
-      const active = ensureActive();
-      loadPage(active.dataset.page || "home");
+  // open quiz
+  function openQuiz(item){
+    const qs = item.questions||[];
+    let stateQ = { answers: Array(qs.length).fill(null) };
+    pageRoot.innerHTML = `
+      <div class="page-transition quiz-view">
+        <div class="card"><button class="btn-back" id="back">Back</button>
+          <div style="margin-top:8px"><div style="font-size:13px;color:var(--muted)">${item.unit} • ${item.moduleName}</div><h2>${escapeHtml(item.title)}</h2></div>
+        </div>
+        <div id="questions-area">
+          ${qs.map((q,qi)=>`
+            <div class="question" data-q="${qi}">
+              <div style="font-weight:700">Q${qi+1}. ${escapeHtml(q.q)}</div>
+              <div class="options">
+                ${q.options.map((opt,oi)=>`<div class="opt" data-qi="${qi}" data-oi="${oi}">${escapeHtml(opt)}</div>`).join("")}
+              </div>
+            </div>
+          `).join("")}
+        </div>
+        <div style="display:flex;gap:10px"><button id="submit-quiz" class="btn-small">Submit</button><button id="cancel-quiz" class="btn-small btn-light">Cancel</button></div>
+      </div>
+    `;
+    $("#back").addEventListener("click", ()=> renderPage("resources"));
+    // option clicks
+    $$(".opt").forEach(el=>{
+      el.addEventListener("click", ()=>{
+        const qi = +el.dataset.qi, oi = +el.dataset.oi;
+        stateQ.answers[qi] = oi;
+        $(`.question[data-q="${qi}"]`).querySelectorAll(".opt").forEach(o=>o.classList.remove("selected"));
+        el.classList.add("selected");
+      });
     });
+    $("#cancel-quiz").addEventListener("click", ()=> renderPage("resources"));
+    $("#submit-quiz").addEventListener("click", ()=>{
+      let correct = 0;
+      qs.forEach((q, i)=> { if(stateQ.answers[i] === q.answer) correct++; });
+      const percent = Math.round((correct/qs.length)*100);
+      // mark progress if >0
+      if(percent>=0){ const prog = loadProgress(); prog[item.id] = true; saveProgress(prog); }
+      pageRoot.innerHTML = `<div class="page-transition"><div class="card result"><h2>Result</h2><div style="font-size:28px;font-weight:700">${percent}%</div><div>${correct} / ${qs.length} correct</div><div style="margin-top:10px"><button id="back-main" class="btn-small">Back</button></div></div></div>`;
+      $("#back-main").addEventListener("click", ()=> renderPage("resources"));
+    });
+  }
+
+  // compute streak: simple days-in-row using localStorage 'eps_last_visit' and visits set
+  function computeStreak(){
+    try{
+      const raw = localStorage.getItem("eps_visits_v1");
+      const visits = raw ? JSON.parse(raw) : [];
+      // visits are ISO date strings yyyy-mm-dd
+      if(!visits.length) return 0;
+      visits.sort();
+      const today = (new Date()).toISOString().slice(0,10);
+      if(!visits.includes(today)) visits.push(today);
+      // compute consecutive days ending today
+      let streak = 0;
+      let d = new Date(); // now
+      for(;;){
+        const iso = d.toISOString().slice(0,10);
+        if(visits.includes(iso)) { streak++; d.setDate(d.getDate()-1); } else break;
+      }
+      // store visits (ensure unique)
+      const uniq = Array.from(new Set(visits));
+      localStorage.setItem("eps_visits_v1", JSON.stringify(uniq));
+      return streak;
+    }catch(e){ return 0; }
+  }
+
+  function computeBadges(progress){
+    const doneCount = Object.keys(progress).filter(k=>progress[k]).length;
+    const badges = [];
+    if(doneCount>=1) badges.push("First Step");
+    if(doneCount>=3) badges.push("Learner");
+    if(doneCount>=6) badges.push("Dedicated");
+    return badges;
+  }
+
+  // generic load & init
+  function init(){
+    fetchData().then(json=>{
+      DATA = Array.isArray(json) ? json : [];
+      buildModules(DATA);
+      // make modules default unchecked (select via clicking)
+      // initial nav wiring
+      navItems.forEach(n=> n.addEventListener("click", ()=> navigate(n.dataset.page)));
+      // start on home (epsilon)
+      navigate("epsilon");
+    });
+  }
+
+  function navigate(page){
+    renderPage(page);
+    // update active nav
+    navItems.forEach(n=> n.classList.toggle("active", n.dataset.page===page));
+  }
+
+  // ensure filters state consistent
+  function renderCurrent(){
+    if(state.page === "resources") populateResources();
+    else if(state.page === "forYou") renderPage("forYou");
+  }
+
+  // init
+  init();
 
 });
-
