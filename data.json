@@ -9,16 +9,26 @@
     "description": "What GDP is and how exports/imports affect it.",
     "mediaType": "quiz",
     "image": "",
-    "tags": ["economy","macro"],
+    "tags": ["economy", "macro"],
     "questions": [
       {
         "q": "What does GDP stand for?",
-        "options": ["Gross Domestic Product","General Domestic Pricing","Government Debt Percentage","Global Development Plan"],
+        "options": [
+          "Gross Domestic Product",
+          "General Domestic Pricing",
+          "Government Debt Percentage",
+          "Global Development Plan"
+        ],
         "answer": 0
       },
       {
         "q": "If exports increase and imports are unchanged, GDP typically:",
-        "options": ["Decreases","Increases","Stays exactly the same","Becomes negative"],
+        "options": [
+          "Decreases",
+          "Increases",
+          "Stays exactly the same",
+          "Becomes negative"
+        ],
         "answer": 1
       }
     ]
@@ -33,7 +43,7 @@
     "description": "How inflation is measured and why prices rise over time.",
     "mediaType": "lesson",
     "image": "",
-    "tags": ["economy","inflation"],
+    "tags": ["economy", "inflation"],
     "contentHtml": "<p>Inflation is the general increase in prices over time. Consumer Price Index (CPI) is commonly used.</p>"
   },
   {
@@ -46,7 +56,7 @@
     "description": "Sole proprietorships, partnerships, corporations and LLCs explained.",
     "mediaType": "lesson",
     "image": "",
-    "tags": ["business","structure"],
+    "tags": ["business", "structure"],
     "contentHtml": "<p>Common forms of legal ownership: sole proprietor, partnership, corporation, LLC.</p>"
   },
   {
@@ -63,7 +73,12 @@
     "questions": [
       {
         "q": "Which is essential for early-stage startups?",
-        "options": ["Product-market fit","Large sales team day one","Extensive legacy systems","Regulatory exemptions"],
+        "options": [
+          "Product-market fit",
+          "Large sales team day one",
+          "Extensive legacy systems",
+          "Regulatory exemptions"
+        ],
         "answer": 0
       }
     ]
@@ -78,7 +93,7 @@
     "description": "Balance sheet, income statement, and cash flow basics.",
     "mediaType": "lesson",
     "image": "",
-    "tags": ["finance","statements"],
+    "tags": ["finance", "statements"],
     "contentHtml": "<p>Three main financial statements: balance sheet, income statement, cash flows.</p>"
   },
   {
@@ -91,11 +106,16 @@
     "description": "How to gather customer insights and analyze markets.",
     "mediaType": "quiz",
     "image": "",
-    "tags": ["marketing","research"],
+    "tags": ["marketing", "research"],
     "questions": [
       {
         "q": "Primary research is:",
-        "options": ["Data you collect directly","Data from third-parties","Only surveys","Always expensive"],
+        "options": [
+          "Data you collect directly",
+          "Data from third-parties",
+          "Only surveys",
+          "Always expensive"
+        ],
         "answer": 0
       }
     ]
@@ -110,7 +130,7 @@
     "description": "Key leadership styles and how to guide teams.",
     "mediaType": "lesson",
     "image": "",
-    "tags": ["management","leadership"],
+    "tags": ["management", "leadership"],
     "contentHtml": "<p>Leadership often combines vision, communication, and delegation.</p>"
   },
   {
@@ -123,7 +143,7 @@
     "description": "Professional dress codes for different settings.",
     "mediaType": "lesson",
     "image": "",
-    "tags": ["presentation","professional"],
+    "tags": ["presentation", "professional"],
     "contentHtml": "<p>Business casual vs formal. Grooming and etiquette basics.</p>"
-  ]
+  }
 ]
