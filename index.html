@@ -7,57 +7,69 @@
 
   <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
-  <link rel="stylesheet" href="style.css?v=1.0.0">
-
-  <meta name="robots" content="noindex,nofollow" />
+  <link rel="stylesheet" href="style.css?v=1.0.5">
 </head>
 <body>
 
-  <div class="navbar">
+  <header class="navbar">
     <div class="nav-links" role="navigation" aria-label="Main">
-      <a class="nav-item active" data-page="home"><i class="fa-solid fa-house"></i> Home</a>
-      <a class="nav-item" data-page="foryou">For You</a>
-      <a class="nav-item" data-page="lessons">Lessons</a>
-      <a class="nav-item" data-page="quizzes">Quizzes</a>
-      <a class="nav-item" data-page="videos">Videos</a>
-      <a class="nav-item" data-page="meetings">Meetings</a>
-
-      <div class="nav-indicator"></div>
+      <a class="nav-item active" data-page="epsilon">Epsilon</a>
+      <a class="nav-item" data-page="dashboard">Dashboard</a>
+      <a class="nav-item" data-page="resources">Resources</a>
+      <a class="nav-item" data-page="scheduler">Scheduler</a>
+      <a class="nav-item" data-page="forYou">For You</a>
     </div>
-
-    <div class="search-area" title="Search (coming)"><i class="fa-solid fa-magnifying-glass"></i>
-      <input placeholder="Search (coming soon)" aria-label="Search">
-    </div>
-  </div>
+    <!-- moved search into sidebar -->
+  </header>
 
   <div class="container">
+
+    <!-- LEFT SIDEBAR -->
     <aside class="left-panel">
-  <div class="sidebar">
+      <div class="sidebar">
+        <div class="left-brand">
+          <h3>Epsilon</h3>
+          <p class="muted">Business Learning Hub</p>
+        </div>
 
-      <div class="left-brand">
-        <h3>Epsilon</h3>
-        <p class="muted">Your business hub</p>
+        <div class="card sidebar-tips">
+          <div class="sidebar-section-title">Quick tips</div>
+          <p class="sidebar-tip">Use the filters below to find Lessons, Quizzes, Videos, and Meetings. Click a card to open.</p>
+        </div>
+
+        <div class="card">
+          <div class="sidebar-section-title">Search</div>
+          <input id="global-search" class="sidebar-search" placeholder="Search title or tags..." />
+        </div>
+
+        <div class="card">
+          <div class="sidebar-section-title">Filter by Type</div>
+          <div class="filter-row">
+            <label><input type="checkbox" class="filter-type" value="lesson" checked/> Lesson</label>
+            <label><input type="checkbox" class="filter-type" value="quiz" checked/> Quiz</label>
+            <label><input type="checkbox" class="filter-type" value="video" checked/> Video</label>
+            <label><input type="checkbox" class="filter-type" value="meeting" checked/> Meeting</label>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="sidebar-section-title">Filter by Module</div>
+          <ul class="module-list" id="module-list">
+            <!-- populated dynamically -->
+          </ul>
+        </div>
+
+        <div class="card">
+          <div class="sidebar-section-title">Quick Actions</div>
+          <div style="display:flex;gap:8px;flex-direction:column">
+            <button id="clear-progress" class="btn-small btn-light">Clear Progress</button>
+            <button id="clear-schedule" class="btn-small btn-light">Clear Schedule</button>
+          </div>
+        </div>
       </div>
+    </aside>
 
-      <div class="sidebar-section-title">Quick tips</div>
-      <p class="sidebar-tip">Use For You to find recommended content. Click cards to open quizzes/lessons.</p>
-
-      <div class="sidebar-section-title">Modules</div>
-      <ul class="module-list">
-        <li><span class="module-dot" style="background:#FF0000"></span>01 Economy Basics</li>
-        <li><span class="module-dot" style="background:#FF6200"></span>02 Business Fundamentals</li>
-        <li><span class="module-dot" style="background:#51FF00"></span>03 Finance & Accounting</li>
-        <li><span class="module-dot" style="background:#0077FF"></span>04 Marketing & Sales</li>
-        <li><span class="module-dot" style="background:#A100FF"></span>05 Management & Ops</li>
-        <li><span class="module-dot" style="background:#FB00FF"></span>06 Business Speaking</li>
-      </ul>
-
-  </div>
-</aside>
-
-
-
+    <!-- MAIN -->
     <main id="page-root" class="main-content"></main>
   </div>
 
@@ -65,8 +77,8 @@
     © 2025 Epsilon — Business Learning
   </footer>
 
-  <script>console.log("Epsilon SPA v1.0.0");</script>
-  <script src="script.js?v=1.0.0" defer></script>
+  <script>console.log("Epsilon SPA v1.0.5");</script>
+  <script src="script.js?v=1.0.5" defer></script>
 </body>
 </html>
 
