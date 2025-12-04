@@ -255,3 +255,27 @@ body{
   .left-panel{ width:100%; }
 }
 
+/* SIDEBAR INSIDE LEFT PANEL */
+.sidebar {
+  color: var(--white);
+}
+
+.sidebar-section-title {
+  color: var(--panel);
+  font-size: 13px;
+  margin-top: 18px;
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+
+.sidebar-tip {
+  color: var(--panel);
+  font-size: 13px;
+  margin-bottom: 10px;
+}
+
+.module-list li {
+  color: var(--white);
+  font-size: 14px;
+}
+
