@@ -174,4 +174,17 @@ body:not(.page-resources) #page-root {
     margin-top: 0 !important;
     padding-top: 0 !important;
 }
+/* REMOVE sidebar space when collapsed */
+.left-panel.collapsed {
+    width: 0 !important;
+    min-width: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+}
+/* Expand content when sidebar is collapsed */
+.container.sidebar-collapsed .main-content {
+    margin-left: 0 !important;
+    width: 100% !important;
+}
 
