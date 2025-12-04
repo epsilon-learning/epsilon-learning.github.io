@@ -1,57 +1,56 @@
-// =========================================
-// UNIVERSAL, STABLE NAV INDICATOR SCRIPT
-// (Works even if fonts load late)
-// =========================================
+/* -----------------------------------------
+   NAV INDICATOR + PAGE ROUTER
+------------------------------------------ */
 
-initNavIndicator(); // Run immediately
+// Move the indicator under the active tab
+function moveIndicator(el) {
+    const rect = el.getBoundingClientRect();
+    const parent = el.parentElement.getBoundingClientRect();
 
-// If fonts load later, correct the position
-document.fonts.ready.then(() => {
-    initNavIndicator(true);
+    const indicator = document.querySelector(".nav-indicator");
+    indicator.style.width = rect.width + "px";
+    indicator.style.transform =
+        `translateX(${rect.left - parent.left}px)`;
+}
+
+// Initial load
+window.addEventListener("load", () => {
+    const indicator = document.querySelector(".nav-indicator");
+    const active = document.querySelector(".nav-item.active");
+
+    indicator.classList.add("no-animate");
+    moveIndicator(active);
+
+    requestAnimationFrame(() => {
+        indicator.classList.remove("no-animate");
+    });
 });
 
-function initNavIndicator(fromFonts = false) {
-    const items = document.querySelectorAll(".nav-item");
-    const indicator = document.querySelector(".nav-indicator");
-    if (!indicator || items.length === 0) return;
+// Click switching
+document.querySelectorAll(".nav-item").forEach(item => {
+    item.addEventListener("click", () => {
 
-    function moveIndicator(el) {
-        if (!el) return;
-        const rect = el.getBoundingClientRect();
-        const parent = el.parentElement.getBoundingClientRect();
-        indicator.style.width = rect.width + "px";
-        indicator.style.transform =
-            `translateX(${rect.left - parent.left}px)`;
-    }
+        // Update active class
+        document.querySelector(".nav-item.active")
+            ?.classList.remove("active");
+        item.classList.add("active");
 
-    // Disable animation ONLY on the first initialization
-    if (!fromFonts) {
-        indicator.classList.add("no-animate");
-    }
+        // Move indicator
+        moveIndicator(item);
 
-    window.requestAnimationFrame(() => {
-        const active = document.querySelector(".nav-item.active");
-        moveIndicator(active);
+        // Page switching
+        const page = item.dataset.page;
 
-        // Re-enable animation AFTER first layout stabilizes
-        if (!fromFonts) {
-            requestAnimationFrame(() => {
-                indicator.classList.remove("no-animate");
-            });
-        }
+        document.querySelector(".active-section")
+            ?.classList.remove("active-section");
+
+        document.querySelector(`#${page}`)
+            .classList.add("active-section");
     });
+});
 
-    // Animate on click
-    items.forEach(item => {
-        item.addEventListener("click", () => {
-            document.querySelector(".nav-item.active")?.classList.remove("active");
-            item.classList.add("active");
-            moveIndicator(item);
-        });
-    });
-
-    // On resize
-    window.addEventListener("resize", () => {
-        moveIndicator(document.querySelector(".nav-item.active"));
-    });
-}
+// Adjust indicator when resizing
+window.addEventListener("resize", () => {
+    const active = document.querySelector(".nav-item.active");
+    moveIndicator(active);
+});
