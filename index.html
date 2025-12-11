@@ -1,29 +1,146 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Epsilon — Business Learning</title>
-
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Epsilon — Business Learning (single-file)</title>
   <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <link rel="stylesheet" href="style.css?v=1.0.6">
+  <style>
+    :root{
+      --black:#000; --dark:#1E1E1E; --blue:#00AAFF; --panel:#B8D3DD; --white:#FFF;
+      --bg:#F2F2F2; --muted:#666; --card-shadow: 0 8px 30px rgba(15,20,30,0.06);
+      --sidebar-width:260px;
+    }
+    /* Reset */
+    *{box-sizing:border-box;margin:0;padding:0}
+    html,body{height:100%}
+    body{
+      font-family:"Lexend",system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;
+      background:var(--bg); color:var(--black);
+      -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
+      -webkit-text-size-adjust:100%;
+    }
+
+    /* NAV */
+    .navbar{height:58px;background:var(--white);border-bottom:1px solid rgba(0,0,0,0.06);
+      display:flex;align-items:center;padding:0 18px;position:sticky;top:0;z-index:1200;}
+    .nav-links{display:flex;gap:18px;margin-right:auto;position:relative;align-items:center}
+    .nav-item{padding:10px 8px;cursor:pointer;color:var(--dark);font-weight:600;white-space:nowrap}
+    .nav-item.active{color:var(--blue)}
+    .nav-indicator{position:absolute;bottom:-2px;height:4px;background:var(--blue);border-radius:4px;
+      transition:transform .32s cubic-bezier(.25,.85,.35,1), width .32s cubic-bezier(.25,.85,.35,1);width:0}
+    .nav-indicator.no-animate{transition:none!important}
+
+    /* layout */
+    .app-wrap{min-height:calc(100vh - 80px);display:flex;gap:18px;padding:18px;align-items:flex-start}
+    /* when no sidebar we hide it entirely (no reserved gap) */
+    .left-panel{width:var(--sidebar-width);min-width:var(--sidebar-width);transition:all .28s ease}
+    .left-panel.hidden{display:none !important;visibility:hidden;opacity:0;transform:translateX(-6px)}
+    .main-col{flex:1;min-width:0;padding:6px 12px}
+
+    /* Sidebar */
+    .sidebar{background:var(--dark);color:var(--white);padding:16px;border-radius:12px;box-shadow:var(--card-shadow);
+      display:flex;flex-direction:column;gap:12px}
+    .left-brand h3{margin:0;font-size:20px}
+    .left-brand .muted{color:var(--panel);font-size:13px;margin-top:4px}
+    .card{background:var(--white);padding:12px;border-radius:10px;box-shadow:var(--card-shadow);color:var(--black);margin-bottom:16px}
+    .sidebar-section-title{font-weight:700;color:var(--muted);font-size:12px;margin-bottom:8px;text-transform:uppercase;letter-spacing:.6px}
+    .sidebar-tip{color:#333;font-size:13px}
+    .sidebar-search{width:100%;padding:8px 10px;border-radius:8px;border:1px solid rgba(0,0,0,0.08);font-size:14px;color:#111}
+
+    /* filters */
+    .filter-row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    .filter-row label{font-size:13px;color:#333}
+    .module-list{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px}
+    .module-list li{display:flex;align-items:center;gap:10px;margin:6px 0;font-size:14px;color:#111;cursor:pointer;padding:6px;border-radius:8px}
+    .module-list li.selected{background:rgba(0,0,0,0.04)}
+    .module-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0}
+
+    /* top search bar for resources */
+    .resources-top{display:flex;gap:12px;align-items:center;margin-bottom:12px}
+    .resources-search{flex:1;display:flex;align-items:center;gap:8px;background:var(--white);padding:8px;border-radius:10px;box-shadow:var(--card-shadow)}
+    .resources-search input{border:none;outline:none;font-size:14px;width:100%;padding:6px}
+    .resources-search .fa-magnifying-glass{color:var(--muted);font-size:18px;margin-left:6px}
+
+    /* card/grid */
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+    .module-card{border-radius:12px;overflow:hidden;background:linear-gradient(180deg,#fff,#fbfbfb);box-shadow:var(--card-shadow);cursor:pointer;display:flex;flex-direction:column;transition:transform .18s ease;min-height:160px}
+    .module-card:hover{transform:translateY(-6px)}
+    .module-card .top{height:68px;padding:12px;display:flex;justify-content:space-between;align-items:flex-start;color:#fff}
+    .unit{font-size:12px;font-weight:700;text-transform:uppercase}
+    .media-icon{width:40px;height:40px;border-radius:8px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.12);color:#fff}
+    .module-card .body{padding:12px;display:flex;flex-direction:column;gap:8px}
+    .title{font-weight:700;font-size:16px}
+    .desc{font-size:13px;color:var(--muted)}
+    .status-tag{display:inline-flex;align-items:center;gap:8px;padding:6px 8px;border-radius:10px;background:#fff;color:#222;font-weight:700;font-size:13px;margin-top:8px;box-shadow:0 3px 10px rgba(0,0,0,0.04)}
+    .status-complete{background:#e9fff0;color:#0a7a3a}
+    .status-incomplete{background:#f6f6f6;color:#9a9a9a}
+    .chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+    .chip{background:rgba(0,0,0,0.04);padding:6px 8px;border-radius:999px;font-size:12px;color:var(--muted)}
+
+    /* back + buttons */
+    .btn-back{display:inline-flex;align-items:center;gap:8px;background:transparent;border:none;color:var(--dark);cursor:pointer;font-weight:600;padding:6px 10px;border-radius:8px}
+    .btn-back .arrow{display:inline-block;transform:translateX(-2px);font-size:14px}
+    button{font-family:"Lexend",sans-serif;border-radius:999px;border:none;padding:8px 14px;cursor:pointer;font-size:14px;background:var(--blue);color:#fff}
+    button.btn-light{background:#f1f1f1;color:#111}
+    .btn-small{padding:8px 12px;border-radius:8px;font-size:13px}
+
+    /* quiz/review */
+    .quiz-view{max-width:920px;margin:0 auto}
+    .question{background:var(--white);padding:14px;border-radius:10px;margin-bottom:12px;box-shadow:var(--card-shadow)}
+    .options{display:flex;flex-direction:column;gap:10px;margin-top:10px}
+    .opt{padding:10px;border-radius:8px;border:1px solid rgba(0,0,0,0.06);cursor:pointer;background:linear-gradient(180deg,#fff,#fafafa)}
+    .opt.selected{background:#eef6ff;border-color:#90c7ff}
+    .review-correct{color:#0a7a3a;font-weight:700}
+    .review-wrong{color:#d33;font-weight:700}
+    .result{background:var(--white);padding:18px;border-radius:12px;box-shadow:var(--card-shadow);text-align:center}
+
+    /* carousel (improved) */
+    .carousel{width:100%;overflow:hidden;border-radius:12px}
+    .carousel-track{display:flex;gap:14px;will-change:transform;align-items:stretch}
+    .carousel-track.animated{animation-name:scrollLeft;animation-timing-function:linear;animation-iteration-count:infinite}
+    @keyframes scrollLeft{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+    /* make carousel items larger so they look like cards (not thin tabs) */
+    .carousel-wrap{display:flex;gap:14px;padding:14px}
+    .carousel-item{min-width:320px;flex:0 0 320px;height:220px;display:flex;flex-direction:column}
+    .carousel-item .module-card{flex:1;min-height:0}
+    /* to keep layout nice on small screens we allow smaller widths */
+    @media (max-width:520px){ .carousel-item{min-width:260px;flex:0 0 260px;height:200px} }
+
+    /* scheduler fake calendar */
+    .scheduler-grid{display:grid;grid-template-columns:1fr 320px;gap:12px;align-items:start}
+    .fake-calendar{background:var(--white);padding:12px;border-radius:12px;box-shadow:var(--card-shadow)}
+    .cal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+    .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+    .cal-cell{padding:6px;text-align:center;border-radius:8px;font-size:13px;background:rgba(0,0,0,0.02)}
+    .cal-today{background:linear-gradient(180deg,#fff9e6,#fff3cc);font-weight:700;color:#c36;border:1px solid rgba(0,0,0,0.06)}
+
+    /* small screens adjustments */
+    @media (max-width:980px){
+      .app-wrap{padding:12px;display:block}
+      .left-panel{width:100%;min-width:auto}
+      .left-panel.hidden{display:none}
+      .main-col{padding:12px}
+      .scheduler-grid{display:block}
+      .scheduler-grid > *{margin-bottom:12px}
+    }
+  </style>
 </head>
 <body>
-
   <header class="navbar">
     <nav class="nav-links" role="navigation" aria-label="Main">
       <a class="nav-item active" data-page="epsilon">Epsilon</a>
       <a class="nav-item" data-page="dashboard">Dashboard</a>
       <a class="nav-item" data-page="resources">Resources</a>
       <a class="nav-item" data-page="scheduler">Scheduler</a>
-      <div class="nav-indicator" aria-hidden="true"></div>
+      <div class="nav-indicator no-animate" aria-hidden="true"></div>
     </nav>
   </header>
 
-  <div class="container">
-    <!-- LEFT SIDEBAR (will be collapsed on Epsilon page) -->
-    <aside id="left-panel" class="left-panel collapsed" aria-hidden="true">
+  <div class="app-wrap">
+    <!-- LEFT SIDEBAR -->
+    <aside id="left-panel" class="left-panel hidden" aria-hidden="true">
       <div class="sidebar">
         <div class="left-brand">
           <h3>Epsilon</h3>
@@ -65,14 +182,518 @@
       </div>
     </aside>
 
-    <!-- MAIN CONTENT -->
-    <main id="page-root" class="main-content" tabindex="-1"></main>
+    <!-- MAIN -->
+    <main id="page-root" class="main-col" tabindex="-1"></main>
   </div>
 
-  <footer>© 2025 Epsilon — Business Learning</footer>
+  <footer style="padding:18px;text-align:center;color:var(--muted);font-size:13px">© 2025 Epsilon — Business Learning</footer>
 
-  <script>console.log("Epsilon SPA v1.0.6");</script>
-  <script src="script.js?v=1.0.6" defer></script>
+  <script>
+  /*********************************************************************
+   * Single-file SPA for Epsilon — Business Learning
+   * - All data embedded
+   * - Fixes: no reserved gap when no sidebar, improved carousel "thickness",
+   *   resources top search with icon, fake calendar on scheduler, responsive.
+   *********************************************************************/
+
+  // === DATA (embedded) ===
+  const DATA = [
+  {"id":"01-01-gdp","module":"01","moduleName":"Economy Basics","moduleColor":"#FF0000","unit":"01.01","title":"GDP — measuring national output","description":"What GDP is and how exports/imports affect it.","mediaType":"quiz","image":"","tags":["economy","macro"],"questions":[{"q":"What does GDP stand for?","options":["Gross Domestic Product","General Domestic Pricing","Government Debt Percentage","Global Development Plan"],"answer":0},{"q":"If exports increase and imports are unchanged, GDP typically:","options":["Decreases","Increases","Stays exactly the same","Becomes negative"],"answer":1}]},
+  {"id":"01-02-inflation","module":"01","moduleName":"Economy Basics","moduleColor":"#FF0000","unit":"01.02","title":"Inflation basics","description":"How inflation is measured and why prices rise over time.","mediaType":"lesson","image":"","tags":["economy","inflation"],"contentHtml":"<p>Inflation is the general increase in prices over time. Consumer Price Index (CPI) is commonly used.</p>"},
+  {"id":"02-01-types","module":"02","moduleName":"Business Fundamentals","moduleColor":"#FF6200","unit":"02.01","title":"Business Types","description":"Sole proprietorships, partnerships, corporations and LLCs explained.","mediaType":"lesson","image":"","tags":["business","structure"],"contentHtml":"<p>Common forms of legal ownership: sole proprietor, partnership, corporation, LLC.</p>"},
+  {"id":"02-03-entre","module":"02","moduleName":"Business Fundamentals","moduleColor":"#FF6200","unit":"02.03","title":"Entrepreneurship essentials","description":"Starting and growing new ventures: idea → product → market fit.","mediaType":"quiz","image":"","tags":["entrepreneurship"],"questions":[{"q":"Which is essential for early-stage startups?","options":["Product-market fit","Large sales team day one","Extensive legacy systems","Regulatory exemptions"],"answer":0}]},
+  {"id":"03-01-finstat","module":"03","moduleName":"Finance & Accounting","moduleColor":"#51FF00","unit":"03.01","title":"Financial statements overview","description":"Balance sheet, income statement, and cash flow basics.","mediaType":"lesson","image":"","tags":["finance","statements"],"contentHtml":"<p>Three main financial statements: balance sheet, income statement, cash flows.</p>"},
+  {"id":"04-01-research","module":"04","moduleName":"Marketing & Sales","moduleColor":"#0077FF","unit":"04.01","title":"Market research intro","description":"How to gather customer insights and analyze markets.","mediaType":"quiz","image":"","tags":["marketing","research"],"questions":[{"q":"Primary research is:","options":["Data you collect directly","Data from third-parties","Only surveys","Always expensive"],"answer":0}]},
+  {"id":"05-01-lead","module":"05","moduleName":"Management & Operations","moduleColor":"#A100FF","unit":"05.01","title":"Leadership basics","description":"Key leadership styles and how to guide teams.","mediaType":"lesson","image":"","tags":["management","leadership"],"contentHtml":"<p>Leadership often combines vision, communication, and delegation.</p>"},
+  {"id":"06-01-attire","module":"06","moduleName":"Business Speaking","moduleColor":"#FB00FF","unit":"06.01","title":"Business Attire","description":"Professional dress codes for different settings.","mediaType":"lesson","image":"","tags":["presentation","professional"],"contentHtml":"<p>Business casual vs formal. Grooming and etiquette basics.</p>"}
+  ];
+
+  // === state and DOM refs ===
+  const pageRoot = document.getElementById('page-root');
+  const leftPanel = document.getElementById('left-panel');
+  const navItems = Array.from(document.querySelectorAll('.nav-item'));
+  const navIndicator = document.querySelector('.nav-indicator');
+  const moduleListEl = document.getElementById('module-list');
+  const globalSearch = document.getElementById('global-search');
+  const appWrap = document.querySelector('.app-wrap');
+
+  const state = {
+    page: 'epsilon',
+    filters: { types: new Set(['lesson','quiz','video','meeting']), modules: new Set(), q: '' }
+  };
+
+  const LS_PROGRESS = 'eps_progress_v1';
+  const LS_SCHEDULE = 'eps_schedule_v1';
+
+  // small helpers
+  const $ = (sel, root=document) => root.querySelector(sel);
+  const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+  const escapeHtml = s => (s===undefined||s===null)?'':String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+  // progress/schedule localStorage helpers
+  function loadProgress(){ try{return JSON.parse(localStorage.getItem(LS_PROGRESS))||{}}catch{return{}} }
+  function saveProgress(o){ try{ localStorage.setItem(LS_PROGRESS, JSON.stringify(o)); }catch{} }
+  function loadSchedule(){ try{return JSON.parse(localStorage.getItem(LS_SCHEDULE))||[]}catch{return[]} }
+  function saveSchedule(a){ try{ localStorage.setItem(LS_SCHEDULE, JSON.stringify(a)); }catch{} }
+
+  // build modules list
+  let MODULES = {};
+  function buildModules(){
+    MODULES = {};
+    DATA.forEach(d=>{
+      const mid = d.module || '00';
+      if(!MODULES[mid]) MODULES[mid] = {moduleName: d.moduleName || ('Module ' + mid), color: d.moduleColor || '#777'};
+    });
+    if(!moduleListEl) return;
+    const keys = Object.keys(MODULES).sort();
+    moduleListEl.innerHTML = keys.map(k=>{
+      const m = MODULES[k];
+      return `<li class="module-item" data-module="${k}"><span class="module-dot" style="background:${m.color}"></span><span class="module-label">${escapeHtml(k)} ${escapeHtml(m.moduleName)}</span></li>`;
+    }).join('');
+    $$('.module-item', moduleListEl).forEach(li=>{
+      li.addEventListener('click', ()=>{
+        const id = li.dataset.module;
+        if(state.filters.modules.has(id)){ state.filters.modules.delete(id); li.classList.remove('selected'); } else { state.filters.modules.add(id); li.classList.add('selected'); }
+        renderCurrent();
+      });
+    });
+  }
+
+  // type filter handlers
+  function attachTypeHandlers(){
+    $$('.filter-type').forEach(cb=>{
+      cb.addEventListener('change', ()=>{
+        const boxes = $$('.filter-type');
+        state.filters.types = new Set(boxes.filter(x=>x.checked).map(x=>x.value));
+        renderCurrent();
+      });
+    });
+  }
+
+  // global search (sidebar)
+  function attachGlobalSearch(){
+    if(!globalSearch) return;
+    globalSearch.addEventListener('input', e=>{
+      state.filters.q = (e.target.value||'').trim().toLowerCase();
+      // if on resources page reflect to top search too (if present)
+      const top = $('#resources-search-input');
+      if(top && top.value !== e.target.value) top.value = e.target.value;
+      renderCurrent();
+    });
+  }
+
+  // status & card building
+  const ICON_MAP = { quiz:'fa-list-check', lesson:'fa-book-open', video:'fa-play', meeting:'fa-users' };
+  function getStatusTagHtml(item){
+    const prog = loadProgress();
+    const done = !!prog[item.id];
+    if(item.mediaType === 'quiz'){
+      const total = (item.questions||[]).length || 0;
+      if(done){ const score = prog[item.id + '_score'] || `${total}/${total}`; return `<div class="status-tag status-complete"><span class="icon"><i class="fa-solid fa-circle-check"></i></span><span class="status-num">completed: ${escapeHtml(score)}</span></div>`; }
+      return `<div class="status-tag status-incomplete"><span class="icon"><i class="fa-solid fa-circle-xmark"></i></span><span class="status-num">incomplete: -/${total}</span></div>`;
+    } else {
+      if(done) return `<div class="status-tag status-complete"><span class="icon"><i class="fa-solid fa-circle-check"></i></span><span class="status-num">completed</span></div>`;
+      return `<div class="status-tag status-incomplete"><span class="icon"><i class="fa-regular fa-circle-xmark"></i></span><span class="status-num">incomplete</span></div>`;
+    }
+  }
+  function makeCard(item){
+    const topColor = item.moduleColor || '#777';
+    return `
+      <article class="module-card" data-id="${escapeHtml(item.id)}" data-media="${escapeHtml(item.mediaType)}">
+        <div class="top" style="background:${topColor}">
+          <div class="unit">${escapeHtml(item.unit)} • ${escapeHtml(item.moduleName)}</div>
+          <div class="media-icon"><i class="fa-solid ${ICON_MAP[item.mediaType]||'fa-file'}"></i></div>
+        </div>
+        <div class="body">
+          <div class="title">${escapeHtml(item.title)}</div>
+          ${getStatusTagHtml(item)}
+          <div class="desc">${escapeHtml(item.description||'')}</div>
+          <div class="chips">${(item.tags||[]).map(t=>`<div class="chip">${escapeHtml(t)}</div>`).join('')}</div>
+        </div>
+      </article>
+    `;
+  }
+
+  // Templates
+  function homeTemplate(){
+    // create preview cards wrapped in .carousel-item so they get a visible width/height
+    const previewItems = DATA.slice(0,6).map(d=>`<div class="carousel-item">${makeCard(d)}</div>`).join('');
+    // duplicate for seamless loop
+    const doubled = previewItems + previewItems;
+    return `
+      <div class="card"><h1>Why Us</h1><p class="muted" style="margin-top:8px">Epsilon helps FBLA students learn business fundamentals quickly.</p></div>
+      <div class="card" style="margin-top:12px">
+        <h3>Featured</h3>
+        <div class="carousel" style="margin-top:12px">
+          <div id="featured-track" class="carousel-track">
+            <div class="carousel-wrap">${doubled}</div>
+          </div>
+        </div>
+      </div>
+      <div class="card" style="margin-top:12px"><h3>Quick Picks</h3><div class="grid" style="margin-top:12px">${DATA.slice(0,4).map(makeCard).join('')}</div></div>
+    `;
+  }
+
+  function dashboardTemplate(){
+    const prog = loadProgress();
+    const unfinishedLessons = DATA.filter(d=>d.mediaType==='lesson' && !prog[d.id]);
+    const unfinishedQuizzes = DATA.filter(d=>d.mediaType==='quiz' && !prog[d.id]);
+    const pickRandom = (arr,n) => { const a = arr.slice(); const out = []; while(out.length<n && a.length) out.push(a.splice(Math.floor(Math.random()*a.length),1)[0]); return out; };
+    let picks = [];
+    picks = picks.concat(pickRandom(unfinishedLessons,2));
+    picks = picks.concat(pickRandom(unfinishedQuizzes,1));
+    if(picks.length < 3){ const fallback = DATA.filter(d=>d.mediaType==='lesson'||d.mediaType==='quiz'); picks = picks.concat(pickRandom(fallback.filter(x=>!picks.includes(x)), 3 - picks.length)); }
+    const cardsHtml = picks.map(makeCard).join('');
+    const completedCount = Object.keys(prog).filter(k=>!k.endsWith('_score') && prog[k]).length;
+    const streak = computeStreak();
+    return `
+      <div class="card"><h2>Dashboard</h2><div style="margin-top:12px"><div class="metric">Completed: <strong>${completedCount}</strong></div><div class="metric">Streak: <strong>${streak}</strong></div></div></div>
+      <div class="card" style="margin-top:12px"><h3>Recommended Lessons & Quiz</h3><div class="grid" style="margin-top:12px">${cardsHtml}</div></div>
+    `;
+  }
+
+  function resourcesTemplate(){
+    // top search bar plus instruction. Sidebar still exists for filters but search is top-level now.
+    return `
+      <div class="card">
+        <h2>Resources</h2>
+        <p class="muted" style="margin-top:8px">Search at the top; use the left sidebar for module/type filters. Click a card to open.</p>
+        <div class="resources-top" style="margin-top:12px">
+          <div class="resources-search" title="Search by title or tag">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input id="resources-search-input" placeholder="Search title or tags..." />
+            <button id="resources-clear-search" class="btn-small btn-light" style="margin-left:6px">Clear</button>
+          </div>
+          <div style="display:flex;gap:8px">
+            <button id="toggle-sidebar" class="btn-small btn-light">Filters</button>
+            <button id="sort-alpha" class="btn-small btn-light">Sort A→Z</button>
+          </div>
+        </div>
+      </div>
+      <div id="resources-grid" class="grid"></div>
+    `;
+  }
+
+  function schedulerTemplate(){
+    // scheduler with fake calendar beside it (desktop), responsive stacks on small screens
+    return `
+      <div class="card"><h2>Scheduler</h2><p class="muted" style="margin-top:8px">Create meetings and keep track of schedule.</p></div>
+      <div class="scheduler-grid" style="margin-top:12px">
+        <div class="card">
+          <h3>Schedule a meeting</h3>
+          <div style="display:flex;flex-direction:column;gap:8px;margin-top:10px">
+            <input id="sched-title" class="sidebar-search" placeholder="Title"/>
+            <input id="sched-date" type="date" class="sidebar-search"/>
+            <input id="sched-time" type="time" class="sidebar-search"/>
+            <input id="sched-teacher" class="sidebar-search" placeholder="Teacher"/>
+            <div style="display:flex;gap:8px"><button id="sched-create" class="btn-small">Create & Schedule</button><button id="sched-view" class="btn-small btn-light">View All</button></div>
+            <div id="sched-list" style="margin-top:8px"></div>
+          </div>
+        </div>
+        <div class="fake-calendar">
+          <div class="cal-head"><strong id="cal-month-year"></strong><div><button id="cal-prev" class="btn-small btn-light">◀</button> <button id="cal-next" class="btn-small btn-light">▶</button></div></div>
+          <div class="cal-grid" id="cal-grid"></div>
+          <div style="margin-top:8px;font-size:13px;color:var(--muted)">This is a fake calendar for demo/scheduler preview.</div>
+        </div>
+      </div>
+    `;
+  }
+
+  // === navigation & rendering ===
+  function setActiveNav(page){
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.toggle('active', n.dataset.page === page));
+    setTimeout(updateNavIndicator, 10);
+  }
+  function updateNavIndicator(){
+    if(!navIndicator) return;
+    const active = document.querySelector('.nav-item.active');
+    if(!active){ navIndicator.style.width = '0px'; navIndicator.style.transform = 'translateX(0px)'; return; }
+    const pRect = active.parentElement.getBoundingClientRect();
+    const r = active.getBoundingClientRect();
+    navIndicator.style.width = Math.round(r.width) + 'px';
+    navIndicator.style.transform = `translateX(${Math.round(r.left - pRect.left)}px)`;
+    navIndicator.classList.remove('no-animate');
+  }
+
+  function showSidebarOnResources(shouldShow){
+    if(!leftPanel) return;
+    if(shouldShow){ leftPanel.classList.remove('hidden'); leftPanel.setAttribute('aria-hidden','false'); } else { leftPanel.classList.add('hidden'); leftPanel.setAttribute('aria-hidden','true'); }
+  }
+
+  function navigateTo(page){
+    state.page = page || 'epsilon';
+    setActiveNav(state.page);
+    showSidebarOnResources(state.page === 'resources');
+    renderPage(state.page);
+  }
+
+  function renderPage(name){
+    if(!pageRoot) return;
+    if(name === 'epsilon') pageRoot.innerHTML = homeTemplate();
+    else if(name === 'dashboard') pageRoot.innerHTML = dashboardTemplate();
+    else if(name === 'resources') pageRoot.innerHTML = resourcesTemplate();
+    else if(name === 'scheduler') pageRoot.innerHTML = schedulerTemplate();
+    else pageRoot.innerHTML = '<div class="card">Page not found</div>';
+    setTimeout(()=> afterRender(name), 40);
+  }
+
+  // after-render wiring
+  function afterRender(name){
+    // attach delegated click for cards
+    pageRoot.removeEventListener('click', pageClickHandler);
+    pageRoot.addEventListener('click', pageClickHandler);
+
+    // resources top search wiring
+    if(name === 'resources'){
+      const topInput = $('#resources-search-input');
+      const clearBtn = $('#resources-clear-search');
+      const toggleBtn = $('#toggle-sidebar');
+      const sortBtn = $('#sort-alpha');
+
+      if(topInput){
+        topInput.value = state.filters.q || '';
+        topInput.addEventListener('input', e=>{
+          const v = (e.target.value||'').trim();
+          state.filters.q = v.toLowerCase();
+          // reflect to sidebar search too
+          if(globalSearch && globalSearch.value !== v) globalSearch.value = v;
+          renderCurrent();
+        });
+      }
+      clearBtn?.addEventListener('click', ()=>{
+        state.filters.q = '';
+        if(topInput) topInput.value = '';
+        if(globalSearch) globalSearch.value = '';
+        renderCurrent();
+      });
+      toggleBtn?.addEventListener('click', ()=> {
+        // toggle left panel visibility manually
+        const hidden = leftPanel.classList.contains('hidden');
+        showSidebarOnResources(hidden);
+      });
+      sortBtn?.addEventListener('click', ()=> {
+        // toggle simple alphabetical
+        DATA.sort((a,b)=>a.title.localeCompare(b.title));
+        populateResources();
+      });
+
+      populateResources();
+    }
+
+    // scheduler wiring and fake calendar
+    if(name === 'scheduler'){
+      $('#sched-create')?.addEventListener('click', ()=>{
+        const title = ($('#sched-title')?.value || '').trim();
+        const date = $('#sched-date')?.value;
+        const time = $('#sched-time')?.value;
+        const teacher = ($('#sched-teacher')?.value || '').trim();
+        if(!title || !date || !time) return alert('Fill title, date, time');
+        const arr = loadSchedule(); arr.push({ id:'s'+Date.now(), title, date, time, teacher }); saveSchedule(arr);
+        alert('Scheduled');
+        renderScheduleList();
+      });
+      $('#sched-view')?.addEventListener('click', renderScheduleList);
+      renderScheduleList();
+      initFakeCalendar();
+    }
+
+    // home carousel setup (auto left loop)
+    const trackWrap = $('#featured-track .carousel-wrap');
+    if(trackWrap){
+      // ensure trackWrap width is at least double so translate -50% matches duplication
+      const totalW = trackWrap.scrollWidth || (trackWrap.children.length * 340);
+      const speed = 120; // px per second
+      let duration = Math.max(20, Math.round(totalW / speed));
+      // assign animation duration
+      trackWrap.style.animationDuration = duration + 's';
+      // apply class to inner wrap
+      trackWrap.parentElement.classList.add('animated');
+      // pause on hover (desktop)
+      trackWrap.parentElement.addEventListener('mouseenter', ()=> trackWrap.style.animationPlayState = 'paused');
+      trackWrap.parentElement.addEventListener('mouseleave', ()=> trackWrap.style.animationPlayState = 'running');
+    }
+
+    // attach search in sidebar
+    attachGlobalSearch();
+    attachTypeHandlers();
+
+    // nav indicator reposition
+    updateNavIndicator();
+  }
+
+  function pageClickHandler(e){
+    const card = e.target.closest('.module-card');
+    if(!card) return;
+    const id = card.dataset.id;
+    if(!id) return;
+    const item = DATA.find(d=>d.id === id);
+    if(!item) return;
+    if(item.mediaType === 'lesson') openLesson(item);
+    else if(item.mediaType === 'quiz') openQuiz(item);
+    else openGeneric(item);
+  }
+
+  // resources population
+  function populateResources(){
+    const grid = $('#resources-grid');
+    if(!grid) return;
+    const types = state.filters.types;
+    const modulesFilter = state.filters.modules;
+    const q = (state.filters.q || '').toLowerCase();
+    const items = DATA.filter(it=>{
+      if(!types.has(it.mediaType)) return false;
+      if(modulesFilter.size && !modulesFilter.has(it.module)) return false;
+      if(q){
+        const title = (it.title||'').toLowerCase();
+        const tags = (it.tags||[]).map(x=>x.toLowerCase());
+        if(!title.includes(q) && !tags.some(x=>x.includes(q))) return false;
+      }
+      return true;
+    });
+    grid.innerHTML = items.length ? items.map(makeCard).join('') : '<div class="card">No items found</div>';
+  }
+
+  // viewers
+  function openLesson(item){
+    pageRoot.innerHTML = `<div class="page-transition"><div class="card"><button class="btn-back" id="back-lesson"><span class="arrow">◀</span>Back</button><div style="margin-top:8px"><div class="muted">${escapeHtml(item.unit)} • ${escapeHtml(item.moduleName)}</div><h2>${escapeHtml(item.title)}</h2></div></div><div class="card">${item.contentHtml||'<p>No content.</p>'}</div><div class="card"><button id="mark-done" class="btn-small">Mark Done</button></div></div>`;
+    $('#back-lesson')?.addEventListener('click', ()=> navigateTo('resources'));
+    $('#mark-done')?.addEventListener('click', ()=> { const p = loadProgress(); p[item.id] = true; saveProgress(p); alert('Marked done'); navigateTo('dashboard'); });
+  }
+
+  function openQuiz(item){
+    const qs = item.questions || [];
+    let answers = Array(qs.length).fill(null);
+    pageRoot.innerHTML = `<div class="page-transition quiz-view"><div class="card"><button class="btn-back" id="back-quiz"><span class="arrow">◀</span>Back</button><div style="margin-top:8px"><div class="muted">${escapeHtml(item.unit)} • ${escapeHtml(item.moduleName)}</div><h2>${escapeHtml(item.title)}</h2></div></div><div id="questions-area">${qs.map((q,i)=>`<div class="question" data-q="${i}"><div style="font-weight:700">Q${i+1}. ${escapeHtml(q.q)}</div><div class="options">${q.options.map((opt,oi)=>`<div class="opt" data-qi="${i}" data-oi="${oi}">${escapeHtml(opt)}</div>`).join('')}</div></div>`).join('')}</div><div style="display:flex;gap:10px"><button id="submit-quiz" class="btn-small">Submit</button><button id="cancel-quiz" class="btn-small btn-light">Cancel</button></div></div>`;
+    $('#back-quiz')?.addEventListener('click', ()=> navigateTo('resources'));
+    $('#cancel-quiz')?.addEventListener('click', ()=> navigateTo('resources'));
+    $$('.opt').forEach(el=>{
+      el.addEventListener('click', ()=>{
+        const qi = +el.dataset.qi, oi = +el.dataset.oi;
+        answers[qi] = oi;
+        const qEl = document.querySelector(`.question[data-q="${qi}"]`);
+        if(qEl) qEl.querySelectorAll('.opt').forEach(o=>o.classList.remove('selected'));
+        el.classList.add('selected');
+      });
+    });
+    $('#submit-quiz')?.addEventListener('click', ()=>{
+      let correct = 0;
+      qs.forEach((q,i)=>{ if(answers[i] === q.answer) correct++; });
+      const total = qs.length || 0;
+      const percent = total ? Math.round((correct/total)*100) : 0;
+      const p = loadProgress(); p[item.id] = true; p[item.id + '_score'] = `${correct}/${total}`; saveProgress(p);
+      pageRoot.innerHTML = `<div class="page-transition"><div class="card result"><h2>Result</h2><div style="font-size:28px;font-weight:700">${percent}%</div><div style="margin-top:8px">${correct} / ${total} correct</div><div style="margin-top:12px"><button id="review-btn" class="btn-small">Review answers</button> <button id="back-list" class="btn-small btn-light">Back</button></div></div><div id="review-area" style="margin-top:12px"></div></div>`;
+      $('#back-list')?.addEventListener('click', ()=> navigateTo('resources'));
+      $('#review-btn')?.addEventListener('click', ()=> renderReview(qs, answers));
+    });
+  }
+
+  function renderReview(questions, answers){
+    const area = $('#review-area');
+    if(!area) return;
+    area.innerHTML = questions.map((q,i)=>{
+      const user = answers[i]; const correct = q.answer; const isCorrect = user === correct;
+      return `<div class="question" style="margin-bottom:10px"><div style="font-weight:700">Q${i+1}. ${escapeHtml(q.q)}</div><div style="margin-top:8px">${q.options.map((opt,oi)=>{ let mark='', cls=''; if(oi===correct){ mark='✅'; cls='review-correct'; } else if(oi===user && !isCorrect){ mark='❌'; cls='review-wrong'; } return `<div style="padding:8px;border-radius:8px;margin-top:6px;background:#fff;border:1px solid rgba(0,0,0,0.04)">${mark} <strong class="${cls}">${escapeHtml(opt)}</strong></div>`; }).join('')}</div></div>`;
+    }).join('');
+    $('#review-area')?.scrollIntoView({behavior:'smooth'});
+  }
+
+  function openGeneric(item){
+    pageRoot.innerHTML = `<div class="page-transition card"><button class="btn-back" id="back-g"><span class="arrow">◀</span>Back</button><div style="margin-top:10px"><div class="muted">${escapeHtml(item.unit)} • ${escapeHtml(item.moduleName)}</div><h2>${escapeHtml(item.title)}</h2><p class="muted">${escapeHtml(item.description||'')}</p></div></div>`;
+    $('#back-g')?.addEventListener('click', ()=> navigateTo('resources'));
+  }
+
+  // streak & visits
+  function computeStreak(){
+    try{
+      const raw = localStorage.getItem('eps_visits_v1');
+      const visits = raw ? JSON.parse(raw) : [];
+      const today = new Date().toISOString().slice(0,10);
+      if(!visits.includes(today)) visits.push(today);
+      const uniq = Array.from(new Set(visits));
+      localStorage.setItem('eps_visits_v1', JSON.stringify(uniq));
+      let streak = 0; let d = new Date();
+      while(true){
+        const iso = d.toISOString().slice(0,10);
+        if(uniq.includes(iso)){ streak++; d.setDate(d.getDate()-1); } else break;
+      }
+      return streak;
+    }catch{return 0;}
+  }
+
+  function renderCurrent(){ if(state.page === 'resources') populateResources(); }
+
+  // nav wiring
+  function wireNav(){
+    document.querySelectorAll('.nav-item').forEach(it=>{
+      it.addEventListener('click', ()=> {
+        const page = it.dataset.page || 'epsilon';
+        navigateTo(page);
+      });
+    });
+  }
+
+  // schedule list render
+  function renderScheduleList(){
+    const list = loadSchedule();
+    const el = $('#sched-list');
+    if(!el) return;
+    if(!list.length) return el.innerHTML = '<div class="muted">No scheduled meetings</div>';
+    el.innerHTML = '<ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px">'+list.map(s=>`<li style="background:#fff;padding:8px;border-radius:8px;box-shadow:var(--card-shadow)"><strong>${escapeHtml(s.title)}</strong><div style="font-size:13px;color:var(--muted)">${escapeHtml(s.date)} ${escapeHtml(s.time)} • ${escapeHtml(s.teacher||'')}</div></li>`).join('')+'</ul>';
+  }
+
+  // fake calendar implementation (small, interactive)
+  let calDate = new Date();
+  function initFakeCalendar(){
+    renderCalendar();
+    $('#cal-prev')?.addEventListener('click', ()=> { calDate.setMonth(calDate.getMonth()-1); renderCalendar(); });
+    $('#cal-next')?.addEventListener('click', ()=> { calDate.setMonth(calDate.getMonth()+1); renderCalendar(); });
+  }
+  function renderCalendar(){
+    const monthYear = $('#cal-month-year');
+    const grid = $('#cal-grid');
+    if(!grid || !monthYear) return;
+    const dt = new Date(calDate.getFullYear(), calDate.getMonth(), 1);
+    const month = dt.toLocaleString(undefined, {month:'long'});
+    monthYear.textContent = `${month} ${dt.getFullYear()}`;
+    grid.innerHTML = '';
+    // day headings
+    const dayNames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+    dayNames.forEach(d => grid.insertAdjacentHTML('beforeend', `<div class="cal-cell" style="font-weight:700;background:transparent">${d}</div>`));
+    // empty cells until first weekday
+    const start = dt.getDay();
+    for(let i=0;i<start;i++) grid.insertAdjacentHTML('beforeend', `<div class="cal-cell" style="background:transparent"></div>`);
+    const days = new Date(dt.getFullYear(), dt.getMonth()+1,0).getDate();
+    const todayIso = new Date().toISOString().slice(0,10);
+    for(let d=1; d<=days; d++){
+      const thisIso = new Date(dt.getFullYear(), dt.getMonth(), d).toISOString().slice(0,10);
+      const isToday = thisIso === todayIso;
+      grid.insertAdjacentHTML('beforeend', `<div class="cal-cell ${isToday? 'cal-today' : ''}">${d}</div>`);
+    }
+  }
+
+  // init
+  function init(){
+    buildModules();
+    attachTypeHandlers();
+    attachGlobalSearch();
+    wireNav();
+    // start on home
+    setTimeout(()=> updateNavIndicator(), 80);
+    // intentionally hide sidebar initially (no reserved gap). It will be shown only on resources.
+    leftPanel.classList.add('hidden');
+    navigateTo('epsilon');
+    // clear buttons wiring (quick actions)
+    $('#clear-progress')?.addEventListener('click', ()=> { if(confirm('Clear all progress?')){ localStorage.removeItem(LS_PROGRESS); alert('Progress cleared'); }});
+    $('#clear-schedule')?.addEventListener('click', ()=> { if(confirm('Clear all scheduled meetings?')){ localStorage.removeItem(LS_SCHEDULE); alert('Schedule cleared'); }});
+  }
+
+  // kick off
+  init();
+
+  // expose small helpers for debugging if needed
+  window.EPS = {DATA, navigateTo, populateResources, loadProgress};
+  </script>
 </body>
 </html>
+
 
